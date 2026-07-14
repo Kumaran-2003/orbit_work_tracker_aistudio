@@ -542,7 +542,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-neutral-800 pb-32">
+    <div className="min-h-screen text-neutral-800 pb-32">
       {/* UNIQUE ORBIT LOGO HEADER */}
       <header className="border-b border-neutral-100 bg-white/75 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40">
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-2.5">
