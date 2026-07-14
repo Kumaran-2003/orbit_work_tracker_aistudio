@@ -86,6 +86,28 @@ export default function App() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
 
+  const [usernameInput, setUsernameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('orbit_authenticated') === 'true';
+  });
+
+  const expectedUsername = import.meta.env.VITE_APP_USERNAME;
+  const expectedPassword = import.meta.env.VITE_APP_PASSWORD;
+  const isAuthConfigured = expectedUsername && expectedPassword;
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (usernameInput === expectedUsername && passwordInput === expectedPassword) {
+      sessionStorage.setItem('orbit_authenticated', 'true');
+      setIsAuthenticated(true);
+      setLoginError('');
+    } else {
+      setLoginError('Invalid username or password.');
+    }
+  };
+
   // Stats filter period on home page
   const [statsPeriod, setStatsPeriod] = useState<'all' | 'this-month' | 'this-week'>('all');
 
@@ -406,6 +428,65 @@ export default function App() {
       totalRevenue,
     };
   }, [filteredHomeEntries, payments, workTypes, statsPeriod]);
+
+  if (isAuthConfigured && !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-white rounded-3xl border border-neutral-200/80 p-8 shadow-xl">
+          <div className="flex flex-col items-center gap-3 mb-6">
+            <span className="text-[#4f46e5]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
+                <path fill="currentColor" d="M9.305 22.243a.8.8 0 0 1-.22 0a10.47 10.47 0 0 1-4.5-2.83a10.49 10.49 0 0 1-2.448-10A10.5 10.5 0 0 1 4.82 4.819a10.47 10.47 0 0 1 9.902-2.765a10.47 10.47 0 0 1 4.669 2.54a10.5 10.5 0 0 1 2.822 4.51a.743.743 0 0 1-1.059.886a.76.76 0 0 1-.37-.436a9 9 0 0 0-2.41-3.894a8.99 8.99 0 0 0-8.585-2.143a9 9 0 0 0-3.953 2.306a9.01 9.01 0 0 0-2.377 8.536a8.99 8.99 0 0 0 6.075 6.443a.77.77 0 0 1 .49 1a.75.75 0 0 1-.72.44"/>
+              </svg>
+            </span>
+            <h1 className="text-xl font-bold tracking-tight text-neutral-950 font-sans lowercase">
+              orbit
+            </h1>
+          </div>
+
+          <h2 className="text-lg font-bold text-center text-neutral-900 mb-6">Sign in to your tracker</h2>
+
+          {loginError && (
+            <div className="bg-red-50 text-red-600 border border-red-100 rounded-xl p-3 text-xs font-semibold mb-4 text-center">
+              {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-neutral-500 mb-1.5">Username</label>
+              <input
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="admin"
+                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#4f46e5] focus:bg-white transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-neutral-500 mb-1.5">Password</label>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#4f46e5] focus:bg-white transition-all"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-sm py-3 rounded-xl tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-all"
+            >
+              Sign In
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-neutral-800 pb-32">
