@@ -19,6 +19,7 @@ interface PresetsManagerProps {
   onDeleteWorkType: (id: string) => void;
   onImportData: (data: { clients: Client[]; workTypes: any[]; workEntries: any[] }) => boolean;
   exportData: () => string;
+  onLoadDemoData: () => void;
 }
 
 // Pastel selection colors matching our minimalist theme
@@ -58,6 +59,7 @@ export default function PresetsManager({
   onDeleteWorkType,
   onImportData,
   exportData,
+  onLoadDemoData,
 }: PresetsManagerProps) {
   // Client forms
   const [newClientName, setNewClientName] = useState('');
@@ -522,6 +524,15 @@ export default function PresetsManager({
                   className="hidden"
                 />
               </label>
+
+              <button
+                onClick={onLoadDemoData}
+                type="button"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#4f46e5]/5 hover:bg-[#4f46e5]/10 border border-[#4f46e5]/20 text-[#4f46e5] font-semibold text-xs rounded-xl transition-colors cursor-pointer"
+                id="load-demo-btn"
+              >
+                Load Sample Data
+              </button>
             </div>
 
             {importSuccess && (

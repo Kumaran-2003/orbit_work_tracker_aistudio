@@ -137,22 +137,16 @@ export default function App() {
           localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify(dbPayments || []));
           setSyncStatus('synced');
         } else {
-          // Database is empty. Seed it.
-          console.log('Remote database is empty. Seeding presets...');
-          await supabase.from('Client').insert(DEFAULT_CLIENTS);
-          await supabase.from('WorkType').insert(DEFAULT_WORK_TYPES);
-          await supabase.from('WorkEntry').insert(DEFAULT_WORK_ENTRIES);
-          await supabase.from('Payment').insert(DEFAULT_PAYMENTS);
+          // Database is empty. Do NOT auto-seed, just set empty state.
+          setClients([]);
+          setWorkTypes(dbWorkTypes || []);
+          setWorkEntries([]);
+          setPayments([]);
 
-          setClients(DEFAULT_CLIENTS);
-          setWorkTypes(DEFAULT_WORK_TYPES);
-          setWorkEntries(DEFAULT_WORK_ENTRIES);
-          setPayments(DEFAULT_PAYMENTS);
-
-          localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(DEFAULT_CLIENTS));
-          localStorage.setItem(STORAGE_KEY_WORK_TYPES, JSON.stringify(DEFAULT_WORK_TYPES));
-          localStorage.setItem(STORAGE_KEY_WORK_ENTRIES, JSON.stringify(DEFAULT_WORK_ENTRIES));
-          localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify(DEFAULT_PAYMENTS));
+          localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify([]));
+          localStorage.setItem(STORAGE_KEY_WORK_TYPES, JSON.stringify(dbWorkTypes || []));
+          localStorage.setItem(STORAGE_KEY_WORK_ENTRIES, JSON.stringify([]));
+          localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify([]));
           setSyncStatus('synced');
         }
       } catch (err) {
@@ -352,6 +346,46 @@ export default function App() {
   const handleExportData = (): string => {
     const backupObj = { clients, workTypes, workEntries, payments };
     return JSON.stringify(backupObj, null, 2);
+  };
+
+  const handleLoadDemoData = async () => {
+    if (window.confirm('Load sample clients, work types, and transaction records? This will merge with your existing data.')) {
+      setSyncStatus('loading');
+      try {
+        const mergedClients = [...clients];
+        const mergedWorkTypes = [...workTypes];
+        const mergedEntries = [...workEntries];
+        const mergedPayments = [...payments];
+
+        DEFAULT_CLIENTS.forEach(c => {
+          if (!mergedClients.some(mc => mc.id === c.id)) mergedClients.push(c);
+        });
+        DEFAULT_WORK_TYPES.forEach(w => {
+          if (!mergedWorkTypes.some(mw => mw.id === w.id)) mergedWorkTypes.push(w);
+        });
+        DEFAULT_WORK_ENTRIES.forEach(e => {
+          if (!mergedEntries.some(me => me.id === e.id)) mergedEntries.push(e);
+        });
+        DEFAULT_PAYMENTS.forEach(p => {
+          if (!mergedPayments.some(mp => mp.id === p.id)) mergedPayments.push(p);
+        });
+
+        saveClients(mergedClients);
+        saveWorkTypes(mergedWorkTypes);
+        saveWorkEntries(mergedEntries);
+        savePayments(mergedPayments);
+
+        await supabase.from('Client').upsert(DEFAULT_CLIENTS);
+        await supabase.from('WorkType').upsert(DEFAULT_WORK_TYPES);
+        await supabase.from('WorkEntry').upsert(DEFAULT_WORK_ENTRIES);
+        await supabase.from('Payment').upsert(DEFAULT_PAYMENTS);
+
+        setSyncStatus('synced');
+      } catch (err) {
+        console.error('Failed to load demo data:', err);
+        setSyncStatus('error');
+      }
+    }
   };
 
   const handleImportData = (parsedData: any): boolean => {
@@ -581,6 +615,7 @@ export default function App() {
               onDeleteWorkType={handleDeleteWorkType}
               onImportData={handleImportData}
               exportData={handleExportData}
+              onLoadDemoData={handleLoadDemoData}
             />
           </div>
         )}
