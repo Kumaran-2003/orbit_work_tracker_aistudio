@@ -80,6 +80,25 @@ export default function App() {
   const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [syncStatus, setSyncStatus] = useState<string>('loading');
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDateTime = (date: Date) => {
+    return date.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
+  };
 
   // Simple, elegant tabs: logs (Home), clients (Client Portfolio), presets (Settings)
   const [activeTab, setActiveTab] = useState<'logs' | 'clients' | 'presets'>('logs');
@@ -527,7 +546,7 @@ export default function App() {
       {/* UNIQUE ORBIT LOGO HEADER */}
       <header className="border-b border-neutral-100 bg-white/75 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40">
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 w-1/3">
             <span className="text-[#4f46e5]" id="header-orbit-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
@@ -539,14 +558,11 @@ export default function App() {
             </span>
           </div>
           
-          <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border border-neutral-200 bg-neutral-50 text-neutral-600">
-            <span className={`w-1.5 h-1.5 rounded-full ${
-              syncStatus === 'synced' ? 'bg-emerald-500' :
-              syncStatus === 'loading' ? 'bg-amber-500 animate-pulse' : 'bg-red-400'
-            }`} />
-            {syncStatus === 'synced' ? 'Connected' :
-             syncStatus === 'loading' ? 'Syncing...' : 'Local Cache'}
+          <div className="flex-1 flex justify-center text-xs font-semibold text-neutral-500 whitespace-nowrap">
+            {formatDateTime(currentTime)}
           </div>
+
+          <div className="w-1/3 flex justify-end" />
         </div>
       </header>
 
@@ -689,6 +705,24 @@ export default function App() {
           <Settings className="w-5.5 h-5.5" />
         </button>
       </nav>
+      
+      {/* GIANT FIXED BACKGROUND LOGO & FOOTER */}
+      <div className="fixed bottom-0 left-0 right-0 h-[24vh] pointer-events-none z-[-1] overflow-hidden flex flex-col justify-end select-none">
+        <div className="flex justify-center w-full">
+          <h1 className="text-[16vw] font-bold text-neutral-900/[0.03] leading-none -mb-[3.2vw] tracking-tighter select-none font-sans lowercase">
+            orbit
+          </h1>
+        </div>
+        
+        <div className="w-full max-w-3xl mx-auto px-6 py-4 flex justify-between items-center text-[10px] text-neutral-400 font-medium select-none pointer-events-auto">
+          <div>© {new Date().getFullYear()} Orbit. All rights reserved.</div>
+          <div className="flex gap-4">
+            <a href="#" className="hover:text-neutral-600 transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-neutral-600 transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-neutral-600 transition-colors">Cookie Policy</a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
