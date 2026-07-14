@@ -706,22 +706,11 @@ export default function App() {
         </button>
       </nav>
       
-      {/* GIANT FIXED BACKGROUND LOGO & FOOTER */}
-      <div className="fixed bottom-0 left-0 right-0 h-[24vh] pointer-events-none z-[-1] overflow-hidden flex flex-col justify-end select-none">
-        <div className="flex justify-center w-full">
-          <h1 className="text-[16vw] font-bold text-neutral-900/[0.03] leading-none -mb-[3.2vw] tracking-tighter select-none font-sans lowercase">
-            orbit
-          </h1>
-        </div>
-        
-        <div className="w-full max-w-3xl mx-auto px-6 py-4 flex justify-between items-center text-[10px] text-neutral-400 font-medium select-none pointer-events-auto">
-          <div>© {new Date().getFullYear()} Orbit. All rights reserved.</div>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-neutral-600 transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-neutral-600 transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-neutral-600 transition-colors">Cookie Policy</a>
-          </div>
-        </div>
+      {/* GIANT FIXED BACKGROUND LOGO (BOTTOM 20% CUT OFF) */}
+      <div className="fixed bottom-0 left-0 right-0 h-[24vh] pointer-events-none z-[-1] overflow-hidden flex items-end justify-center select-none">
+        <h1 className="text-[22vw] font-bold text-neutral-900/[0.03] leading-none -mb-[4.4vw] tracking-tighter select-none font-sans lowercase">
+          orbit
+        </h1>
       </div>
     </div>
   );
