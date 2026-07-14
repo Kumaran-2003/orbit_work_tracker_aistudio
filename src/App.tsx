@@ -1,0 +1,472 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect, useMemo } from 'react';
+import PresetsManager from './components/PresetsManager';
+import WorkEntryForm from './components/WorkEntryForm';
+import RecentWorksList from './components/RecentWorksList';
+import ClientWorksView from './components/ClientWorksView';
+import { Client, WorkType, WorkEntry, Payment } from './types';
+import { Home, Users, Settings, Plus, Layers, ArrowUpRight, DollarSign, Briefcase, Video } from 'lucide-react';
+
+const STORAGE_KEY_CLIENTS = 'reels_tracker_clients';
+const STORAGE_KEY_WORK_TYPES = 'reels_tracker_work_types';
+const STORAGE_KEY_WORK_ENTRIES = 'reels_tracker_work_entries';
+const STORAGE_KEY_PAYMENTS = 'reels_tracker_payments';
+
+const DEFAULT_CLIENTS: Client[] = [
+  { id: 'c1', name: 'FitLife Coaching', color: 'bg-yellow-100' },
+  { id: 'c2', name: 'Aura Tech Reviews', color: 'bg-emerald-100' },
+  { id: 'c3', name: 'Chef Antonio Recipes', color: 'bg-rose-100' },
+  { id: 'c4', name: 'Saga Podcast Studio', color: 'bg-sky-100' },
+];
+
+const DEFAULT_WORK_TYPES: WorkType[] = [
+  { id: 'w1', name: 'Full Reel Edit', icon: 'mage:video' },
+  { id: 'w2', name: 'Color Grading & Audio', icon: 'mage:sound' },
+  { id: 'w3', name: 'Short-form Cutdown', icon: 'mage:play' },
+  { id: 'w4', name: 'Captions & Sound FX', icon: 'mage:microphone' },
+  { id: 'w5', name: 'Thumbnail & Polish', icon: 'mage:image' },
+];
+
+const DEFAULT_WORK_ENTRIES: WorkEntry[] = [
+  {
+    id: 'e1',
+    title: 'Gym Motivation Reel #12 - Final Cut',
+    clientId: 'c1',
+    workTypeId: 'w1',
+    completedOn: '2026-07-13',
+    notes: 'Used high-energy synth music. Applied fast cuts on beat drop. Highlighted key words in bright yellow subtitles. Exported 1080x1920 60fps.'
+  },
+  {
+    id: 'e2',
+    title: 'iPhone 18 Pro Honest Review Teaser',
+    clientId: 'c2',
+    workTypeId: 'w3',
+    completedOn: '2026-07-10',
+    notes: 'Cut down from a 15-minute review to 45 seconds. Kept the most critical punchlines and zoom transitions.'
+  },
+  {
+    id: 'e3',
+    title: 'Truffle Pasta Intro Clip',
+    clientId: 'c3',
+    workTypeId: 'w2',
+    completedOn: '2026-07-02',
+    notes: 'Color graded raw food footage for rich saturation. Restructured cooking voiceover with noise gate.'
+  },
+  {
+    id: 'e4',
+    title: 'Saga Ep.21 Highlight Short',
+    clientId: 'c4',
+    workTypeId: 'w4',
+    completedOn: '2026-06-25',
+    notes: 'Highlighted VR headset conversation. Applied smooth zoom scales.'
+  }
+];
+
+const DEFAULT_PAYMENTS: Payment[] = [
+  { id: 'p1', clientId: 'c1', amount: 250, paymentDate: '2026-07-13', note: 'Batch payment for Gym motivation reels' },
+  { id: 'p2', clientId: 'c2', amount: 180, paymentDate: '2026-07-10', note: 'iPhone reviews milestone' },
+  { id: 'p3', clientId: 'c3', amount: 320, paymentDate: '2026-07-02', note: 'Retainer upfront' },
+];
+
+export default function App() {
+  const [clients, setClients] = useState<Client[]>([]);
+  const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
+  const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+
+  // Simple, elegant tabs: logs (Home), clients (Client Portfolio), presets (Settings)
+  const [activeTab, setActiveTab] = useState<'logs' | 'clients' | 'presets'>('logs');
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
+
+  // Stats filter period on home page
+  const [statsPeriod, setStatsPeriod] = useState<'all' | 'this-month' | 'this-week'>('all');
+
+  // Load initial states from localstorage or defaults
+  useEffect(() => {
+    const cachedClients = localStorage.getItem(STORAGE_KEY_CLIENTS);
+    const cachedWorkTypes = localStorage.getItem(STORAGE_KEY_WORK_TYPES);
+    const cachedWorkEntries = localStorage.getItem(STORAGE_KEY_WORK_ENTRIES);
+    const cachedPayments = localStorage.getItem(STORAGE_KEY_PAYMENTS);
+
+    if (cachedClients) {
+      setClients(JSON.parse(cachedClients));
+    } else {
+      setClients(DEFAULT_CLIENTS);
+      localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(DEFAULT_CLIENTS));
+    }
+
+    if (cachedWorkTypes) {
+      setWorkTypes(JSON.parse(cachedWorkTypes));
+    } else {
+      setWorkTypes(DEFAULT_WORK_TYPES);
+      localStorage.setItem(STORAGE_KEY_WORK_TYPES, JSON.stringify(DEFAULT_WORK_TYPES));
+    }
+
+    if (cachedWorkEntries) {
+      setWorkEntries(JSON.parse(cachedWorkEntries));
+    } else {
+      setWorkEntries(DEFAULT_WORK_ENTRIES);
+      localStorage.setItem(STORAGE_KEY_WORK_ENTRIES, JSON.stringify(DEFAULT_WORK_ENTRIES));
+    }
+
+    if (cachedPayments) {
+      setPayments(JSON.parse(cachedPayments));
+    } else {
+      setPayments(DEFAULT_PAYMENTS);
+      localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify(DEFAULT_PAYMENTS));
+    }
+  }, []);
+
+  // Synchronizers
+  const saveClients = (data: Client[]) => {
+    setClients(data);
+    localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(data));
+  };
+
+  const saveWorkTypes = (data: WorkType[]) => {
+    setWorkTypes(data);
+    localStorage.setItem(STORAGE_KEY_WORK_TYPES, JSON.stringify(data));
+  };
+
+  const saveWorkEntries = (data: WorkEntry[]) => {
+    setWorkEntries(data);
+    localStorage.setItem(STORAGE_KEY_WORK_ENTRIES, JSON.stringify(data));
+  };
+
+  const savePayments = (data: Payment[]) => {
+    setPayments(data);
+    localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify(data));
+  };
+
+  // CLIENT HANDLERS
+  const handleAddClient = (name: string, color: string) => {
+    const newClient: Client = {
+      id: 'client_' + Date.now(),
+      name,
+      color,
+    };
+    saveClients([...clients, newClient]);
+  };
+
+  const handleUpdateClient = (id: string, name: string, color: string) => {
+    saveClients(
+      clients.map((c) => (c.id === id ? { ...c, name, color } : c))
+    );
+  };
+
+  const handleDeleteClient = (id: string) => {
+    if (window.confirm('Delete this client preset? Past logs referencing this client will remain but show without a designated preset.')) {
+      saveClients(clients.filter((c) => c.id !== id));
+    }
+  };
+
+  // WORK TYPE HANDLERS
+  const handleAddWorkType = (name: string, icon?: string) => {
+    const newWorkType: WorkType = {
+      id: 'worktype_' + Date.now(),
+      name,
+      icon: icon || 'mage:sparkles',
+    };
+    saveWorkTypes([...workTypes, newWorkType]);
+  };
+
+  const handleUpdateWorkType = (id: string, name: string, icon?: string) => {
+    saveWorkTypes(
+      workTypes.map((wt) => (wt.id === id ? { ...wt, name, icon: icon || wt.icon || 'mage:sparkles' } : wt))
+    );
+  };
+
+  const handleDeleteWorkType = (id: string) => {
+    if (window.confirm('Delete this work type preset? Past logs referencing this type will remain intact.')) {
+      saveWorkTypes(workTypes.filter((wt) => wt.id !== id));
+    }
+  };
+
+  // WORK LOG HANDLERS
+  const handleFormSubmit = (entryData: Omit<WorkEntry, 'id'> & { id?: string }) => {
+    if (entryData.id) {
+      const updated = workEntries.map((e) =>
+        e.id === entryData.id ? ({ ...e, ...entryData } as WorkEntry) : e
+      );
+      saveWorkEntries(updated);
+      setEditingEntry(null);
+      setIsAdding(false);
+    } else {
+      const newEntry: WorkEntry = {
+        ...entryData,
+        id: 'entry_' + Date.now(),
+      };
+      saveWorkEntries([newEntry, ...workEntries]);
+      setIsAdding(false);
+    }
+  };
+
+  const handleDeleteEntry = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this completed work log? This action is permanent.')) {
+      saveWorkEntries(workEntries.filter((e) => e.id !== id));
+    }
+  };
+
+  const handleStartEditEntry = (entry: WorkEntry) => {
+    setEditingEntry(entry);
+    setIsAdding(true);
+  };
+
+  // PAYMENT HANDLERS
+  const handleAddPayment = (paymentData: Omit<Payment, 'id'>) => {
+    const newPayment: Payment = {
+      ...paymentData,
+      id: 'payment_' + Date.now(),
+    };
+    savePayments([newPayment, ...payments]);
+  };
+
+  const handleDeletePayment = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this payment record? This will adjust the revenue calculation.')) {
+      savePayments(payments.filter((p) => p.id !== id));
+    }
+  };
+
+  // DATA PORTABILITY
+  const handleExportData = (): string => {
+    const backupObj = { clients, workTypes, workEntries, payments };
+    return JSON.stringify(backupObj, null, 2);
+  };
+
+  const handleImportData = (parsedData: any): boolean => {
+    if (
+      parsedData &&
+      Array.isArray(parsedData.clients) &&
+      Array.isArray(parsedData.workTypes) &&
+      Array.isArray(parsedData.workEntries)
+    ) {
+      saveClients(parsedData.clients);
+      saveWorkTypes(parsedData.workTypes);
+      saveWorkEntries(parsedData.workEntries);
+      if (Array.isArray(parsedData.payments)) {
+        savePayments(parsedData.payments);
+      } else {
+        savePayments([]);
+      }
+      return true;
+    }
+    return false;
+  };
+
+  // Helper to determine if a YYYY-MM-DD date is within stats period
+  const isWithinPeriod = (dateStr: string, period: 'all' | 'this-month' | 'this-week') => {
+    if (period === 'all') return true;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return true;
+    
+    const today = new Date();
+    const target = new Date(d.getTime() + d.getTimezoneOffset() * 60000); // adjust for timezone offset
+    
+    if (period === 'this-month') {
+      return target.getFullYear() === today.getFullYear() && target.getMonth() === today.getMonth();
+    }
+    
+    if (period === 'this-week') {
+      const todayNum = today.getTime();
+      const oneDay = 24 * 60 * 60 * 1000;
+      const currentDay = today.getDay();
+      const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
+      
+      const monday = new Date(todayNum - (distanceToMonday * oneDay));
+      monday.setHours(0,0,0,0);
+      
+      const sunday = new Date(monday.getTime() + (6 * oneDay));
+      sunday.setHours(23,59,59,999);
+      
+      return target >= monday && target <= sunday;
+    }
+    return true;
+  };
+
+  // Filter entries for home page card list and stats
+  const filteredHomeEntries = useMemo(() => {
+    return workEntries.filter(entry => isWithinPeriod(entry.completedOn, statsPeriod));
+  }, [workEntries, statsPeriod]);
+
+  // Compute Stats
+  const stats = useMemo(() => {
+    const totalGigs = filteredHomeEntries.length;
+    
+    const totalReels = filteredHomeEntries.filter(entry => {
+      const type = workTypes.find(t => t.id === entry.workTypeId);
+      return type?.name.toLowerCase().includes('reel');
+    }).length;
+    
+    const filteredPayments = payments.filter(p => isWithinPeriod(p.paymentDate, statsPeriod));
+    const totalRevenue = filteredPayments.reduce((sum, p) => sum + p.amount, 0);
+    
+    return {
+      totalGigs,
+      totalReels,
+      totalRevenue,
+    };
+  }, [filteredHomeEntries, payments, workTypes, statsPeriod]);
+
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] text-neutral-800 pb-32">
+      {/* UNIQUE ORBIT LOGO HEADER */}
+      <header className="border-b border-neutral-100 bg-white/75 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40">
+        <div className="max-w-3xl mx-auto flex items-center justify-center gap-2.5">
+          <span className="text-[#4f46e5]" id="header-orbit-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
+              <path fill="currentColor" d="M9.305 22.243a.8.8 0 0 1-.22 0a10.47 10.47 0 0 1-4.5-2.83a10.49 10.49 0 0 1-2.448-10A10.5 10.5 0 0 1 4.82 4.819a10.47 10.47 0 0 1 9.902-2.765a10.47 10.47 0 0 1 4.669 2.54a10.5 10.5 0 0 1 2.822 4.51a.743.743 0 0 1-1.059.886a.76.76 0 0 1-.37-.436a9 9 0 0 0-2.41-3.894a8.99 8.99 0 0 0-8.585-2.143a9 9 0 0 0-3.953 2.306a9.01 9.01 0 0 0-2.377 8.536a8.99 8.99 0 0 0 6.075 6.443a.77.77 0 0 1 .49 1a.75.75 0 0 1-.72.44"/>
+            </svg>
+          </span>
+          <span className="text-base font-bold tracking-tight text-neutral-950 font-sans lowercase">
+            orbit
+          </span>
+        </div>
+      </header>
+
+      {/* CORE WRAPPER */}
+      <main className="max-w-3xl mx-auto px-4.5 mt-8 md:mt-10">
+        {/* TAB 1: RECENT COMPLETED LOGS (HOME) */}
+        {activeTab === 'logs' && (
+          <div className="space-y-6">
+            {/* LARGE HERO MINIMAL INITIATOR */}
+            <div className="p-[1px] rounded-full bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99]">
+              <button
+                onClick={() => {
+                  setEditingEntry(null);
+                  setIsAdding(true);
+                }}
+                className="w-full text-center py-4 px-6 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-sm rounded-full tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5]"
+                id="primary-initiator-btn"
+              >
+                <Plus className="w-4 h-4" />
+                log work
+              </button>
+            </div>
+
+            {/* LIGHT DOTTED LINE BETWEEN INITIATOR BUTTON AND RECENT GIGS */}
+            <div className="border-t-2 border-dotted border-neutral-200/80 my-8" />
+
+            {/* PLAIN LIST UNDERNEATH */}
+            <RecentWorksList
+              entries={workEntries}
+              clients={clients}
+              workTypes={workTypes}
+              onEditEntry={handleStartEditEntry}
+              onDeleteEntry={handleDeleteEntry}
+              onOpenAddForm={() => setIsAdding(true)}
+            />
+          </div>
+        )}
+
+        {/* TAB 2: CLIENT PORTFOLIO VIEW */}
+        {activeTab === 'clients' && (
+          <div className="animate-fade-in">
+            <ClientWorksView
+              entries={workEntries}
+              clients={clients}
+              workTypes={workTypes}
+              payments={payments}
+              onAddPayment={handleAddPayment}
+              onDeletePayment={handleDeletePayment}
+              onEditEntry={handleStartEditEntry}
+              onDeleteEntry={handleDeleteEntry}
+            />
+          </div>
+        )}
+
+        {/* TAB 3: APP PRESETS AND SETTINGS */}
+        {activeTab === 'presets' && (
+          <div className="animate-fade-in">
+            <PresetsManager
+              clients={clients}
+              workTypes={workTypes}
+              onAddClient={handleAddClient}
+              onUpdateClient={handleUpdateClient}
+              onDeleteClient={handleDeleteClient}
+              onAddWorkType={handleAddWorkType}
+              onUpdateWorkType={handleUpdateWorkType}
+              onDeleteWorkType={handleDeleteWorkType}
+              onImportData={handleImportData}
+              exportData={handleExportData}
+            />
+          </div>
+        )}
+      </main>
+
+      {/* MODAL OVERLAY FOR LOG ENTRY FORM */}
+      {isAdding && (
+        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl relative my-auto overflow-hidden">
+            <WorkEntryForm
+              clients={clients}
+              workTypes={workTypes}
+              onSubmit={handleFormSubmit}
+              onCancel={() => {
+                setIsAdding(false);
+                setEditingEntry(null);
+              }}
+              editingEntry={editingEntry}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING BOTTOM CENTER NAVIGATION BAR */}
+      <nav
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-md border border-neutral-200/50 rounded-full p-1.5 shadow-xl z-50 flex items-center gap-1.5 max-w-[95%] w-max font-sans"
+        id="floating-bottom-nav"
+      >
+        <button
+          onClick={() => {
+            setActiveTab('logs');
+          }}
+          className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
+            activeTab === 'logs'
+              ? 'bg-[#4f46e5] text-white shadow-md scale-105'
+              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+          }`}
+          id="nav-btn-logs"
+          title="Home"
+        >
+          <Home className="w-5.5 h-5.5" />
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('clients');
+          }}
+          className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
+            activeTab === 'clients'
+              ? 'bg-[#4f46e5] text-white shadow-md scale-105'
+              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+          }`}
+          id="nav-btn-clients"
+          title="Clients"
+        >
+          <Users className="w-5.5 h-5.5" />
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('presets');
+          }}
+          className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
+            activeTab === 'presets'
+              ? 'bg-[#4f46e5] text-white shadow-md scale-105'
+              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+          }`}
+          id="nav-btn-presets"
+          title="Settings"
+        >
+          <Settings className="w-5.5 h-5.5" />
+        </button>
+      </nav>
+    </div>
+  );
+}

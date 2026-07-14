@@ -1,0 +1,6 @@
+{
+  "name": "Freelancer Work Tracker",
+  "description": "A simple and minimalist brutalist-style tracker for freelancers to log and filter completed works with client and work type presets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
