@@ -545,8 +545,8 @@ export default function App() {
     <div className="min-h-screen text-neutral-800 pb-32">
       {/* UNIQUE ORBIT LOGO HEADER */}
       <header className="border-b border-neutral-100 bg-white/75 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40">
-        <div className="max-w-3xl mx-auto flex items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5 w-1/3">
+        <div className="max-w-3xl mx-auto flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
             <span className="text-[#4f46e5]" id="header-orbit-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
@@ -557,12 +557,6 @@ export default function App() {
               orbit
             </span>
           </div>
-          
-          <div className="flex-1 flex justify-center text-xs font-semibold text-neutral-500 whitespace-nowrap">
-            {formatDateTime(currentTime)}
-          </div>
-
-          <div className="w-1/3 flex justify-end" />
         </div>
       </header>
 

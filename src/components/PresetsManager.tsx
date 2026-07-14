@@ -189,10 +189,10 @@ export default function PresetsManager({
                   className="flex-1 p-2 bg-white border border-neutral-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400 transition-all"
                   id="new-client-name"
                 />
-                <div className="p-[1px] rounded-full bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] shrink-0">
+                <div className="p-[1px] rounded-xl bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] shrink-0">
                   <button
                     type="submit"
-                    className="px-4 py-1.5 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-xs rounded-full tracking-wide shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5] transition-all cursor-pointer"
+                    className="px-4 py-1.5 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-xs rounded-xl tracking-wide shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5] transition-all cursor-pointer"
                     id="add-client-submit"
                   >
                     Add Client
@@ -342,10 +342,10 @@ export default function PresetsManager({
                     className="flex-1 p-2 bg-white border border-neutral-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400 transition-all"
                     id="new-worktype-name"
                   />
-                  <div className="p-[1px] rounded-full bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] shrink-0">
+                  <div className="p-[1px] rounded-xl bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] shrink-0">
                     <button
                       type="submit"
-                      className="px-4 py-1.5 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-xs rounded-full tracking-wide shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5] transition-all cursor-pointer"
+                      className="px-4 py-1.5 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-xs rounded-xl tracking-wide shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5] transition-all cursor-pointer"
                       id="add-worktype-submit"
                     >
                       Add Type
@@ -504,7 +504,7 @@ export default function PresetsManager({
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleExport}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 font-medium text-xs rounded-full active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 font-medium text-xs rounded-xl active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
                 id="export-data-btn"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -512,7 +512,7 @@ export default function PresetsManager({
               </button>
 
               <label
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 font-medium text-xs rounded-full active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 font-medium text-xs rounded-xl active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
                 id="import-data-label"
               >
                 <Upload className="w-3.5 h-3.5" />
@@ -528,7 +528,7 @@ export default function PresetsManager({
               <button
                 onClick={onLoadDemoData}
                 type="button"
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#4f46e5]/5 hover:bg-[#4f46e5]/10 border border-[#4f46e5]/20 text-[#4f46e5] font-semibold text-xs rounded-full active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#4f46e5]/5 hover:bg-[#4f46e5]/10 border border-[#4f46e5]/20 text-[#4f46e5] font-semibold text-xs rounded-xl active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
                 id="load-demo-btn"
               >
                 Load Sample Data
