@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: '/orbit_work_tracker_aistudio/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

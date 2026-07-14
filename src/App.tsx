@@ -72,11 +72,14 @@ const DEFAULT_PAYMENTS: Payment[] = [
   { id: 'p3', clientId: 'c3', amount: 320, paymentDate: '2026-07-02', note: 'Retainer upfront' },
 ];
 
+import { supabase } from './supabaseClient';
+
 export default function App() {
   const [clients, setClients] = useState<Client[]>([]);
   const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
   const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [syncStatus, setSyncStatus] = useState<string>('loading');
 
   // Simple, elegant tabs: logs (Home), clients (Client Portfolio), presets (Settings)
   const [activeTab, setActiveTab] = useState<'logs' | 'clients' | 'presets'>('logs');
@@ -86,40 +89,70 @@ export default function App() {
   // Stats filter period on home page
   const [statsPeriod, setStatsPeriod] = useState<'all' | 'this-month' | 'this-week'>('all');
 
-  // Load initial states from localstorage or defaults
+  // Load initial states from localstorage or defaults, synced with Supabase
   useEffect(() => {
-    const cachedClients = localStorage.getItem(STORAGE_KEY_CLIENTS);
-    const cachedWorkTypes = localStorage.getItem(STORAGE_KEY_WORK_TYPES);
-    const cachedWorkEntries = localStorage.getItem(STORAGE_KEY_WORK_ENTRIES);
-    const cachedPayments = localStorage.getItem(STORAGE_KEY_PAYMENTS);
+    const fetchData = async () => {
+      setSyncStatus('loading');
+      try {
+        const { data: dbClients, error: errClients } = await supabase.from('Client').select('*');
+        const { data: dbWorkTypes, error: errWorkTypes } = await supabase.from('WorkType').select('*');
+        const { data: dbEntries, error: errEntries } = await supabase.from('WorkEntry').select('*');
+        const { data: dbPayments, error: errPayments } = await supabase.from('Payment').select('*');
 
-    if (cachedClients) {
-      setClients(JSON.parse(cachedClients));
-    } else {
-      setClients(DEFAULT_CLIENTS);
-      localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(DEFAULT_CLIENTS));
-    }
+        if (errClients || errWorkTypes || errEntries || errPayments) {
+          throw new Error('Supabase fetch failed');
+        }
 
-    if (cachedWorkTypes) {
-      setWorkTypes(JSON.parse(cachedWorkTypes));
-    } else {
-      setWorkTypes(DEFAULT_WORK_TYPES);
-      localStorage.setItem(STORAGE_KEY_WORK_TYPES, JSON.stringify(DEFAULT_WORK_TYPES));
-    }
+        if (dbClients && dbClients.length > 0) {
+          setClients(dbClients);
+          setWorkTypes(dbWorkTypes || []);
+          setWorkEntries(dbEntries || []);
+          setPayments(dbPayments || []);
 
-    if (cachedWorkEntries) {
-      setWorkEntries(JSON.parse(cachedWorkEntries));
-    } else {
-      setWorkEntries(DEFAULT_WORK_ENTRIES);
-      localStorage.setItem(STORAGE_KEY_WORK_ENTRIES, JSON.stringify(DEFAULT_WORK_ENTRIES));
-    }
+          localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(dbClients));
+          localStorage.setItem(STORAGE_KEY_WORK_TYPES, JSON.stringify(dbWorkTypes || []));
+          localStorage.setItem(STORAGE_KEY_WORK_ENTRIES, JSON.stringify(dbEntries || []));
+          localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify(dbPayments || []));
+          setSyncStatus('synced');
+        } else {
+          // Database is empty. Seed it.
+          console.log('Remote database is empty. Seeding presets...');
+          await supabase.from('Client').insert(DEFAULT_CLIENTS);
+          await supabase.from('WorkType').insert(DEFAULT_WORK_TYPES);
+          await supabase.from('WorkEntry').insert(DEFAULT_WORK_ENTRIES);
+          await supabase.from('Payment').insert(DEFAULT_PAYMENTS);
 
-    if (cachedPayments) {
-      setPayments(JSON.parse(cachedPayments));
-    } else {
-      setPayments(DEFAULT_PAYMENTS);
-      localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify(DEFAULT_PAYMENTS));
-    }
+          setClients(DEFAULT_CLIENTS);
+          setWorkTypes(DEFAULT_WORK_TYPES);
+          setWorkEntries(DEFAULT_WORK_ENTRIES);
+          setPayments(DEFAULT_PAYMENTS);
+
+          localStorage.setItem(STORAGE_KEY_CLIENTS, JSON.stringify(DEFAULT_CLIENTS));
+          localStorage.setItem(STORAGE_KEY_WORK_TYPES, JSON.stringify(DEFAULT_WORK_TYPES));
+          localStorage.setItem(STORAGE_KEY_WORK_ENTRIES, JSON.stringify(DEFAULT_WORK_ENTRIES));
+          localStorage.setItem(STORAGE_KEY_PAYMENTS, JSON.stringify(DEFAULT_PAYMENTS));
+          setSyncStatus('synced');
+        }
+      } catch (err) {
+        console.warn('Could not sync with Supabase. Loading local cache...', err);
+        loadLocalCache();
+      }
+    };
+
+    const loadLocalCache = () => {
+      const cachedClients = localStorage.getItem(STORAGE_KEY_CLIENTS);
+      const cachedWorkTypes = localStorage.getItem(STORAGE_KEY_WORK_TYPES);
+      const cachedWorkEntries = localStorage.getItem(STORAGE_KEY_WORK_ENTRIES);
+      const cachedPayments = localStorage.getItem(STORAGE_KEY_PAYMENTS);
+
+      setClients(cachedClients ? JSON.parse(cachedClients) : DEFAULT_CLIENTS);
+      setWorkTypes(cachedWorkTypes ? JSON.parse(cachedWorkTypes) : DEFAULT_WORK_TYPES);
+      setWorkEntries(cachedWorkEntries ? JSON.parse(cachedWorkEntries) : DEFAULT_WORK_ENTRIES);
+      setPayments(cachedPayments ? JSON.parse(cachedPayments) : DEFAULT_PAYMENTS);
+      setSyncStatus('local-only');
+    };
+
+    fetchData();
   }, []);
 
   // Synchronizers
@@ -144,51 +177,81 @@ export default function App() {
   };
 
   // CLIENT HANDLERS
-  const handleAddClient = (name: string, color: string) => {
+  const handleAddClient = async (name: string, color: string) => {
     const newClient: Client = {
       id: 'client_' + Date.now(),
       name,
       color,
     };
     saveClients([...clients, newClient]);
+    try {
+      await supabase.from('Client').insert([newClient]);
+    } catch (e) {
+      console.error('Supabase write error:', e);
+    }
   };
 
-  const handleUpdateClient = (id: string, name: string, color: string) => {
+  const handleUpdateClient = async (id: string, name: string, color: string) => {
     saveClients(
       clients.map((c) => (c.id === id ? { ...c, name, color } : c))
     );
+    try {
+      await supabase.from('Client').update({ name, color }).eq('id', id);
+    } catch (e) {
+      console.error('Supabase write error:', e);
+    }
   };
 
-  const handleDeleteClient = (id: string) => {
+  const handleDeleteClient = async (id: string) => {
     if (window.confirm('Delete this client preset? Past logs referencing this client will remain but show without a designated preset.')) {
       saveClients(clients.filter((c) => c.id !== id));
+      try {
+        await supabase.from('Client').delete().eq('id', id);
+      } catch (e) {
+        console.error('Supabase write error:', e);
+      }
     }
   };
 
   // WORK TYPE HANDLERS
-  const handleAddWorkType = (name: string, icon?: string) => {
+  const handleAddWorkType = async (name: string, icon?: string) => {
     const newWorkType: WorkType = {
       id: 'worktype_' + Date.now(),
       name,
       icon: icon || 'mage:sparkles',
     };
     saveWorkTypes([...workTypes, newWorkType]);
+    try {
+      await supabase.from('WorkType').insert([newWorkType]);
+    } catch (e) {
+      console.error('Supabase write error:', e);
+    }
   };
 
-  const handleUpdateWorkType = (id: string, name: string, icon?: string) => {
+  const handleUpdateWorkType = async (id: string, name: string, icon?: string) => {
     saveWorkTypes(
       workTypes.map((wt) => (wt.id === id ? { ...wt, name, icon: icon || wt.icon || 'mage:sparkles' } : wt))
     );
+    try {
+      await supabase.from('WorkType').update({ name, icon: icon || 'mage:sparkles' }).eq('id', id);
+    } catch (e) {
+      console.error('Supabase write error:', e);
+    }
   };
 
-  const handleDeleteWorkType = (id: string) => {
+  const handleDeleteWorkType = async (id: string) => {
     if (window.confirm('Delete this work type preset? Past logs referencing this type will remain intact.')) {
       saveWorkTypes(workTypes.filter((wt) => wt.id !== id));
+      try {
+        await supabase.from('WorkType').delete().eq('id', id);
+      } catch (e) {
+        console.error('Supabase write error:', e);
+      }
     }
   };
 
   // WORK LOG HANDLERS
-  const handleFormSubmit = (entryData: Omit<WorkEntry, 'id'> & { id?: string }) => {
+  const handleFormSubmit = async (entryData: Omit<WorkEntry, 'id'> & { id?: string }) => {
     if (entryData.id) {
       const updated = workEntries.map((e) =>
         e.id === entryData.id ? ({ ...e, ...entryData } as WorkEntry) : e
@@ -196,6 +259,17 @@ export default function App() {
       saveWorkEntries(updated);
       setEditingEntry(null);
       setIsAdding(false);
+      try {
+        await supabase.from('WorkEntry').update({
+          title: entryData.title,
+          clientId: entryData.clientId,
+          workTypeId: entryData.workTypeId,
+          completedOn: entryData.completedOn,
+          notes: entryData.notes
+        }).eq('id', entryData.id);
+      } catch (e) {
+        console.error('Supabase write error:', e);
+      }
     } else {
       const newEntry: WorkEntry = {
         ...entryData,
@@ -203,12 +277,22 @@ export default function App() {
       };
       saveWorkEntries([newEntry, ...workEntries]);
       setIsAdding(false);
+      try {
+        await supabase.from('WorkEntry').insert([newEntry]);
+      } catch (e) {
+        console.error('Supabase write error:', e);
+      }
     }
   };
 
-  const handleDeleteEntry = (id: string) => {
+  const handleDeleteEntry = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this completed work log? This action is permanent.')) {
       saveWorkEntries(workEntries.filter((e) => e.id !== id));
+      try {
+        await supabase.from('WorkEntry').delete().eq('id', id);
+      } catch (e) {
+        console.error('Supabase write error:', e);
+      }
     }
   };
 
@@ -218,17 +302,27 @@ export default function App() {
   };
 
   // PAYMENT HANDLERS
-  const handleAddPayment = (paymentData: Omit<Payment, 'id'>) => {
+  const handleAddPayment = async (paymentData: Omit<Payment, 'id'>) => {
     const newPayment: Payment = {
       ...paymentData,
       id: 'payment_' + Date.now(),
     };
     savePayments([newPayment, ...payments]);
+    try {
+      await supabase.from('Payment').insert([newPayment]);
+    } catch (e) {
+      console.error('Supabase write error:', e);
+    }
   };
 
-  const handleDeletePayment = (id: string) => {
+  const handleDeletePayment = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this payment record? This will adjust the revenue calculation.')) {
       savePayments(payments.filter((p) => p.id !== id));
+      try {
+        await supabase.from('Payment').delete().eq('id', id);
+      } catch (e) {
+        console.error('Supabase write error:', e);
+      }
     }
   };
 
@@ -288,6 +382,7 @@ export default function App() {
     return true;
   };
 
+
   // Filter entries for home page card list and stats
   const filteredHomeEntries = useMemo(() => {
     return workEntries.filter(entry => isWithinPeriod(entry.completedOn, statsPeriod));
@@ -316,16 +411,27 @@ export default function App() {
     <div className="min-h-screen bg-[#FAFAFA] text-neutral-800 pb-32">
       {/* UNIQUE ORBIT LOGO HEADER */}
       <header className="border-b border-neutral-100 bg-white/75 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40">
-        <div className="max-w-3xl mx-auto flex items-center justify-center gap-2.5">
-          <span className="text-[#4f46e5]" id="header-orbit-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
-              <path fill="currentColor" d="M9.305 22.243a.8.8 0 0 1-.22 0a10.47 10.47 0 0 1-4.5-2.83a10.49 10.49 0 0 1-2.448-10A10.5 10.5 0 0 1 4.82 4.819a10.47 10.47 0 0 1 9.902-2.765a10.47 10.47 0 0 1 4.669 2.54a10.5 10.5 0 0 1 2.822 4.51a.743.743 0 0 1-1.059.886a.76.76 0 0 1-.37-.436a9 9 0 0 0-2.41-3.894a8.99 8.99 0 0 0-8.585-2.143a9 9 0 0 0-3.953 2.306a9.01 9.01 0 0 0-2.377 8.536a8.99 8.99 0 0 0 6.075 6.443a.77.77 0 0 1 .49 1a.75.75 0 0 1-.72.44"/>
-            </svg>
-          </span>
-          <span className="text-base font-bold tracking-tight text-neutral-950 font-sans lowercase">
-            orbit
-          </span>
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[#4f46e5]" id="header-orbit-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
+                <path fill="currentColor" d="M9.305 22.243a.8.8 0 0 1-.22 0a10.47 10.47 0 0 1-4.5-2.83a10.49 10.49 0 0 1-2.448-10A10.5 10.5 0 0 1 4.82 4.819a10.47 10.47 0 0 1 9.902-2.765a10.47 10.47 0 0 1 4.669 2.54a10.5 10.5 0 0 1 2.822 4.51a.743.743 0 0 1-1.059.886a.76.76 0 0 1-.37-.436a9 9 0 0 0-2.41-3.894a8.99 8.99 0 0 0-8.585-2.143a9 9 0 0 0-3.953 2.306a9.01 9.01 0 0 0-2.377 8.536a8.99 8.99 0 0 0 6.075 6.443a.77.77 0 0 1 .49 1a.75.75 0 0 1-.72.44"/>
+              </svg>
+            </span>
+            <span className="text-base font-bold tracking-tight text-neutral-950 font-sans lowercase">
+              orbit
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border border-neutral-200 bg-neutral-50 text-neutral-600">
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              syncStatus === 'synced' ? 'bg-emerald-500' :
+              syncStatus === 'loading' ? 'bg-amber-500 animate-pulse' : 'bg-red-400'
+            }`} />
+            {syncStatus === 'synced' ? 'Connected' :
+             syncStatus === 'loading' ? 'Syncing...' : 'Local Cache'}
+          </div>
         </div>
       </header>
 
