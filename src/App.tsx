@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import PresetsManager from './components/PresetsManager';
 import WorkEntryForm from './components/WorkEntryForm';
 import RecentWorksList from './components/RecentWorksList';
@@ -74,7 +75,7 @@ const DEFAULT_PAYMENTS: Payment[] = [
 
 import { supabase } from './supabaseClient';
 
-export default function App() {
+function AppContent() {
   const [clients, setClients] = useState<Client[]>([]);
   const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
   const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
@@ -82,26 +83,12 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState<string>('loading');
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const formatDateTime = (date: Date) => {
-    return date.toLocaleString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-    });
-  };
-
-  // Simple, elegant tabs: logs (Home), clients (Client Portfolio), presets (Settings)
-  const [activeTab, setActiveTab] = useState<'logs' | 'clients' | 'presets'>('logs');
+  // Determine active tab from route path
+  const activeTab = location.pathname === '/clients' ? 'clients' :
+                    location.pathname === '/presets' ? 'presets' : 'logs';
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
 
@@ -578,73 +565,72 @@ export default function App() {
 
       {/* CORE WRAPPER */}
       <main className="max-w-3xl mx-auto px-4.5 mt-8 md:mt-10">
-        {/* TAB 1: RECENT COMPLETED LOGS (HOME) */}
-        {activeTab === 'logs' && (
-          <div className="space-y-6">
-            {/* LARGE HERO MINIMAL INITIATOR */}
-            <div className="p-[1px] rounded-full bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99]">
-              <button
-                onClick={() => {
-                  setEditingEntry(null);
-                  setIsAdding(true);
-                }}
-                className="w-full text-center py-4 px-6 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-sm rounded-full tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5]"
-                id="primary-initiator-btn"
-              >
-                <Plus className="w-4 h-4" />
-                log work
-              </button>
+        <Routes>
+          <Route path="/" element={
+            <div className="space-y-6">
+              {/* LARGE HERO MINIMAL INITIATOR */}
+              <div className="p-[1px] rounded-full bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99]">
+                <button
+                  onClick={() => {
+                    setEditingEntry(null);
+                    setIsAdding(true);
+                  }}
+                  className="w-full text-center py-4 px-6 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-sm rounded-full tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5]"
+                  id="primary-initiator-btn"
+                >
+                  <Plus className="w-4 h-4" />
+                  log work
+                </button>
+              </div>
+
+              {/* LIGHT DOTTED LINE BETWEEN INITIATOR BUTTON AND RECENT GIGS */}
+              <div className="border-t-2 border-dotted border-neutral-200/80 my-8" />
+
+              {/* PLAIN LIST UNDERNEATH */}
+              <RecentWorksList
+                entries={workEntries}
+                clients={clients}
+                workTypes={workTypes}
+                onEditEntry={handleStartEditEntry}
+                onDeleteEntry={handleDeleteEntry}
+                onOpenAddForm={() => setIsAdding(true)}
+              />
             </div>
+          } />
 
-            {/* LIGHT DOTTED LINE BETWEEN INITIATOR BUTTON AND RECENT GIGS */}
-            <div className="border-t-2 border-dotted border-neutral-200/80 my-8" />
+          <Route path="/clients" element={
+            <div className="animate-fade-in">
+              <ClientWorksView
+                entries={workEntries}
+                clients={clients}
+                workTypes={workTypes}
+                payments={payments}
+                onAddPayment={handleAddPayment}
+                onDeletePayment={handleDeletePayment}
+                onEditEntry={handleStartEditEntry}
+                onDeleteEntry={handleDeleteEntry}
+              />
+            </div>
+          } />
 
-            {/* PLAIN LIST UNDERNEATH */}
-            <RecentWorksList
-              entries={workEntries}
-              clients={clients}
-              workTypes={workTypes}
-              onEditEntry={handleStartEditEntry}
-              onDeleteEntry={handleDeleteEntry}
-              onOpenAddForm={() => setIsAdding(true)}
-            />
-          </div>
-        )}
-
-        {/* TAB 2: CLIENT PORTFOLIO VIEW */}
-        {activeTab === 'clients' && (
-          <div className="animate-fade-in">
-            <ClientWorksView
-              entries={workEntries}
-              clients={clients}
-              workTypes={workTypes}
-              payments={payments}
-              onAddPayment={handleAddPayment}
-              onDeletePayment={handleDeletePayment}
-              onEditEntry={handleStartEditEntry}
-              onDeleteEntry={handleDeleteEntry}
-            />
-          </div>
-        )}
-
-        {/* TAB 3: APP PRESETS AND SETTINGS */}
-        {activeTab === 'presets' && (
-          <div className="animate-fade-in">
-            <PresetsManager
-              clients={clients}
-              workTypes={workTypes}
-              onAddClient={handleAddClient}
-              onUpdateClient={handleUpdateClient}
-              onDeleteClient={handleDeleteClient}
-              onAddWorkType={handleAddWorkType}
-              onUpdateWorkType={handleUpdateWorkType}
-              onDeleteWorkType={handleDeleteWorkType}
-              onImportData={handleImportData}
-              exportData={handleExportData}
-              onLoadDemoData={handleLoadDemoData}
-            />
-          </div>
-        )}
+          <Route path="/presets" element={
+            <div className="animate-fade-in">
+              <PresetsManager
+                clients={clients}
+                workTypes={workTypes}
+                onAddClient={handleAddClient}
+                onUpdateClient={handleUpdateClient}
+                onDeleteClient={handleDeleteClient}
+                onAddWorkType={handleAddWorkType}
+                onUpdateWorkType={handleUpdateWorkType}
+                onDeleteWorkType={handleDeleteWorkType}
+                onImportData={handleImportData}
+                exportData={handleExportData}
+                onLoadDemoData={handleLoadDemoData}
+              />
+            </div>
+          } />
+        </Routes>
       </main>
 
       {/* MODAL OVERLAY FOR LOG ENTRY FORM */}
@@ -672,7 +658,7 @@ export default function App() {
       >
         <button
           onClick={() => {
-            setActiveTab('logs');
+            navigate('/');
           }}
           className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
             activeTab === 'logs'
@@ -687,7 +673,7 @@ export default function App() {
 
         <button
           onClick={() => {
-            setActiveTab('clients');
+            navigate('/clients');
           }}
           className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
             activeTab === 'clients'
@@ -702,7 +688,7 @@ export default function App() {
 
         <button
           onClick={() => {
-            setActiveTab('presets');
+            navigate('/presets');
           }}
           className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
             activeTab === 'presets'
@@ -723,5 +709,13 @@ export default function App() {
         </h1>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <HashRouter>
+      <AppContent />
+    </HashRouter>
   );
 }
