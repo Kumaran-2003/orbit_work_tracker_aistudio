@@ -17,7 +17,7 @@ interface PresetsManagerProps {
   onAddWorkType: (name: string, icon?: string) => void;
   onUpdateWorkType: (id: string, name: string, icon?: string) => void;
   onDeleteWorkType: (id: string) => void;
-  onImportData: (data: { clients: Client[]; workTypes: any[]; workEntries: any[] }) => boolean;
+  onImportData: (data: { clients: Client[]; workTypes: any[]; workEntries: any[] }) => Promise<boolean>;
   exportData: () => string;
   onLoadDemoData: () => void;
 }
@@ -138,11 +138,11 @@ export default function PresetsManager({
     const fileReader = new FileReader();
     if (e.target.files && e.target.files[0]) {
       fileReader.readAsText(e.target.files[0], 'UTF-8');
-      fileReader.onload = (event) => {
+      fileReader.onload = async (event) => {
         try {
           const parsed = JSON.parse(event.target?.result as string);
           if (parsed && typeof parsed === 'object') {
-            const success = onImportData(parsed);
+            const success = await onImportData(parsed);
             if (success) {
               setImportSuccess(true);
               setImportError(null);

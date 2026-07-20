@@ -407,22 +407,38 @@ export default function App() {
     }
   };
 
-  const handleImportData = (parsedData: any): boolean => {
+  const handleImportData = async (parsedData: any): Promise<boolean> => {
     if (
       parsedData &&
       Array.isArray(parsedData.clients) &&
       Array.isArray(parsedData.workTypes) &&
       Array.isArray(parsedData.workEntries)
     ) {
-      saveClients(parsedData.clients);
-      saveWorkTypes(parsedData.workTypes);
-      saveWorkEntries(parsedData.workEntries);
-      if (Array.isArray(parsedData.payments)) {
-        savePayments(parsedData.payments);
-      } else {
-        savePayments([]);
+      setSyncStatus('loading');
+      try {
+        const paymentsData = Array.isArray(parsedData.payments) ? parsedData.payments : [];
+
+        // Save locally first for instant UI response
+        saveClients(parsedData.clients);
+        saveWorkTypes(parsedData.workTypes);
+        saveWorkEntries(parsedData.workEntries);
+        savePayments(paymentsData);
+
+        // Upload all imported records to Supabase in parallel
+        await Promise.all([
+          parsedData.clients.length > 0 ? supabase.from('Client').upsert(parsedData.clients) : Promise.resolve(),
+          parsedData.workTypes.length > 0 ? supabase.from('WorkType').upsert(parsedData.workTypes) : Promise.resolve(),
+          parsedData.workEntries.length > 0 ? supabase.from('WorkEntry').upsert(parsedData.workEntries) : Promise.resolve(),
+          paymentsData.length > 0 ? supabase.from('Payment').upsert(paymentsData) : Promise.resolve(),
+        ]);
+
+        setSyncStatus('synced');
+        return true;
+      } catch (err) {
+        console.error('Failed to upload imported backup to Supabase:', err);
+        setSyncStatus('error');
+        return false;
       }
-      return true;
     }
     return false;
   };
