@@ -7,14 +7,14 @@
 }
 
 body {
-  background-color: #FAFAFA;
+  background-color: #2d4d51;
   font-family: var(--font-sans);
-  color: #1c1917;
+  color: #cdddf0;
   overflow-y: scroll;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Elegant scrollbar */
+/* Custom theme scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -23,10 +23,10 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e5e5e5;
+  background: rgba(205, 221, 240, 0.2);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4d4d4;
+  background: rgba(205, 221, 240, 0.35);
 }
 

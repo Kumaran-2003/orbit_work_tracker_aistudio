@@ -164,20 +164,20 @@ export default function PresetsManager({
     <div className="space-y-6 font-sans">
       {/* INTRO */}
       <div>
-        <h2 className="text-2xl font-medium tracking-tight text-neutral-900">App Presets & Configuration</h2>
+        <h2 className="text-2xl font-medium tracking-tight text-[#cdddf0]">App Presets & Configuration</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* LEFT COLUMN: CLIENT PRESETS */}
-        <div className="bg-white p-6 border border-neutral-100 shadow-sm rounded-2xl space-y-4">
-          <h3 className="text-base font-medium text-neutral-800 tracking-tight">
+        <div className="bg-[#224044] p-6 border border-[#cdddf0]/15 shadow-lg rounded-2xl space-y-4">
+          <h3 className="text-base font-semibold text-[#cdddf0] tracking-tight">
             Client Accounts
           </h3>
 
           {/* Add Client Form */}
-          <form onSubmit={handleCreateClient} className="p-4 bg-neutral-50 border border-neutral-200/50 rounded-xl space-y-3">
+          <form onSubmit={handleCreateClient} className="p-4 bg-[#1c3538] border border-[#cdddf0]/15 rounded-xl space-y-3">
             <div>
-              <span className="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">
+              <span className="block text-[11px] font-medium uppercase tracking-wider text-[#cdddf0]/60 mb-1">
                 Client Name
               </span>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -186,23 +186,21 @@ export default function PresetsManager({
                   placeholder="e.g. FitLife Coaching"
                   value={newClientName}
                   onChange={(e) => setNewClientName(e.target.value)}
-                  className="flex-1 p-2 bg-white border border-neutral-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400 transition-all"
+                  className="flex-1 p-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0] focus:outline-none focus:border-[#38bdf8] transition-all"
                   id="new-client-name"
                 />
-                <div className="p-[1px] rounded-xl bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] shrink-0">
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-xs rounded-xl tracking-wide shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5] transition-all cursor-pointer"
-                    id="add-client-submit"
-                  >
-                    Add Client
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 bg-[#38bdf8] hover:bg-[#7dd3fc] text-[#1c3538] font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm shrink-0"
+                  id="add-client-submit"
+                >
+                  Add Client
+                </button>
               </div>
             </div>
 
             <div>
-              <span className="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">
+              <span className="block text-[11px] font-medium uppercase tracking-wider text-[#cdddf0]/60 mb-1">
                 Accent Theme Color
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -213,8 +211,8 @@ export default function PresetsManager({
                     onClick={() => setNewClientColor(color.class)}
                     className={`w-6 h-6 rounded-full border cursor-pointer transition-all ${color.class} ${
                       newClientColor === color.class
-                        ? 'border-neutral-950 scale-105 ring-1 ring-neutral-950/10'
-                        : 'border-neutral-200 hover:border-neutral-400'
+                        ? 'border-white scale-105 ring-2 ring-[#38bdf8]'
+                        : 'border-transparent opacity-80 hover:opacity-100'
                     }`}
                     title={color.label}
                     id={`color-preset-${color.class.replace(/[^a-zA-Z0-9]/g, '')}`}
@@ -227,7 +225,7 @@ export default function PresetsManager({
           {/* Client List */}
           <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
             {clients.length === 0 ? (
-              <div className="p-6 text-center border border-dashed border-neutral-200 rounded-xl text-xs text-neutral-400 font-medium">
+              <div className="p-6 text-center border border-dashed border-[#cdddf0]/20 rounded-xl text-xs text-[#cdddf0]/60 font-medium">
                 No clients added yet.
               </div>
             ) : (
@@ -236,8 +234,8 @@ export default function PresetsManager({
                 return (
                   <div
                     key={client.id}
-                    className={`p-3 border border-neutral-100 rounded-xl flex items-center justify-between transition-colors ${
-                      isEditing ? 'bg-white' : 'bg-white hover:bg-neutral-50/50'
+                    className={`p-3 border border-[#cdddf0]/15 rounded-xl flex items-center justify-between transition-colors ${
+                      isEditing ? 'bg-[#1c3538]' : 'bg-[#1c3538]/70 hover:bg-[#1c3538]'
                     }`}
                     id={`client-item-${client.id}`}
                   >
@@ -247,7 +245,7 @@ export default function PresetsManager({
                           type="text"
                           value={editingClientName}
                           onChange={(e) => setEditingClientName(e.target.value)}
-                          className="w-full p-2 border border-neutral-200 rounded-lg text-xs font-medium"
+                          className="w-full p-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0]"
                           id={`edit-client-input-${client.id}`}
                         />
                         <div className="flex gap-1 items-center">
@@ -257,7 +255,7 @@ export default function PresetsManager({
                               type="button"
                               onClick={() => setEditingClientColor(color.class)}
                               className={`w-5 h-5 rounded-full border cursor-pointer ${color.class} ${
-                                editingClientColor === color.class ? 'border-neutral-800 ring-1 ring-neutral-800/10' : 'border-neutral-200'
+                                editingClientColor === color.class ? 'border-white ring-1 ring-white' : 'border-transparent'
                               }`}
                               id={`edit-client-color-${client.id}-${color.class.replace(/[^a-zA-Z0-9]/g, '')}`}
                             />
@@ -266,8 +264,8 @@ export default function PresetsManager({
                       </div>
                     ) : (
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-3 h-3 rounded-full border border-neutral-900/15 ${client.color}`} />
-                        <span className="font-medium text-neutral-800 text-xs">{client.name}</span>
+                        <div className={`w-3 h-3 rounded-full border border-white/20 ${client.color}`} />
+                        <span className="font-semibold text-[#cdddf0] text-xs">{client.name}</span>
                       </div>
                     )}
 
@@ -276,7 +274,7 @@ export default function PresetsManager({
                         <>
                           <button
                             onClick={() => handleSaveClient(client.id)}
-                            className="p-1 px-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-all cursor-pointer text-[10px] font-medium"
+                            className="p-1 px-2 bg-[#38bdf8] text-[#1c3538] rounded-lg hover:bg-[#7dd3fc] transition-all cursor-pointer text-[10px] font-bold"
                             title="Save changes"
                             id={`save-client-btn-${client.id}`}
                           >
@@ -284,7 +282,7 @@ export default function PresetsManager({
                           </button>
                           <button
                             onClick={() => setEditingClientId(null)}
-                            className="p-1 px-2 bg-neutral-100 text-neutral-600 rounded-lg hover:bg-neutral-200 transition-all cursor-pointer text-[10px] font-medium"
+                            className="p-1 px-2 border border-[#cdddf0]/20 text-[#cdddf0]/70 rounded-lg hover:bg-[#27484d] transition-all cursor-pointer text-[10px] font-medium"
                             title="Cancel"
                             id={`cancel-client-btn-${client.id}`}
                           >
@@ -295,7 +293,7 @@ export default function PresetsManager({
                         <>
                           <button
                             onClick={() => handleStartEditClient(client)}
-                            className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 border border-neutral-200/60 rounded-xl transition-all cursor-pointer"
+                            className="p-1.5 text-[#cdddf0]/60 hover:text-[#38bdf8] hover:bg-[#27484d] border border-[#cdddf0]/15 rounded-xl transition-all cursor-pointer"
                             title="Edit Client"
                             id={`start-edit-client-btn-${client.id}`}
                           >
@@ -303,7 +301,7 @@ export default function PresetsManager({
                           </button>
                           <button
                             onClick={() => onDeleteClient(client.id)}
-                            className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50/50 border border-neutral-200/60 rounded-xl transition-all cursor-pointer"
+                            className="p-1.5 text-[#cdddf0]/60 hover:text-rose-400 hover:bg-rose-950/50 border border-[#cdddf0]/15 rounded-xl transition-all cursor-pointer"
                             title="Delete Client"
                             id={`delete-client-btn-${client.id}`}
                           >
@@ -322,15 +320,15 @@ export default function PresetsManager({
         {/* RIGHT COLUMN: WORK TYPES & BACKUP */}
         <div className="space-y-6">
           {/* Work Types panel */}
-          <div className="bg-white p-6 border border-neutral-100 shadow-sm rounded-2xl space-y-4">
-            <h3 className="text-base font-medium text-neutral-800 tracking-tight">
+          <div className="bg-[#224044] p-6 border border-[#cdddf0]/15 shadow-lg rounded-2xl space-y-4">
+            <h3 className="text-base font-semibold text-[#cdddf0] tracking-tight">
               Work Types & Icons
             </h3>
 
             {/* Add Work Type Form */}
-            <form onSubmit={handleCreateWorkType} className="p-4 bg-neutral-50 border border-neutral-200/50 rounded-xl space-y-3.5">
+            <form onSubmit={handleCreateWorkType} className="p-4 bg-[#1c3538] border border-[#cdddf0]/15 rounded-xl space-y-3.5">
               <div>
-                <span className="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">
+                <span className="block text-[11px] font-medium uppercase tracking-wider text-[#cdddf0]/60 mb-1">
                   New Work Type Name
                 </span>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -339,27 +337,25 @@ export default function PresetsManager({
                     placeholder="e.g. Color Grading & SFX"
                     value={newWorkTypeName}
                     onChange={(e) => setNewWorkTypeName(e.target.value)}
-                    className="flex-1 p-2 bg-white border border-neutral-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400 transition-all"
+                    className="flex-1 p-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0] focus:outline-none focus:border-[#38bdf8] transition-all"
                     id="new-worktype-name"
                   />
-                  <div className="p-[1px] rounded-xl bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99] shrink-0">
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-xs rounded-xl tracking-wide shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5] transition-all cursor-pointer"
-                      id="add-worktype-submit"
-                    >
-                      Add Type
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 bg-[#38bdf8] hover:bg-[#7dd3fc] text-[#1c3538] font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm shrink-0"
+                    id="add-worktype-submit"
+                  >
+                    Add Type
+                  </button>
                 </div>
               </div>
 
               {/* Icon Selector Grid */}
               <div>
-                <span className="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-[#cdddf0]/60 mb-1.5">
                   Select Work Icon (Mage Pack)
                 </span>
-                <div className="grid grid-cols-6 gap-1.5 bg-white p-2 border border-neutral-200/60 rounded-lg max-h-[100px] overflow-y-auto">
+                <div className="grid grid-cols-6 gap-1.5 bg-[#224044] p-2 border border-[#cdddf0]/20 rounded-lg max-h-[100px] overflow-y-auto">
                   {AVAILABLE_MAGE_ICONS.map((ico) => {
                     const isSelected = newWorkTypeIcon === ico.id;
                     return (
@@ -369,8 +365,8 @@ export default function PresetsManager({
                         onClick={() => setNewWorkTypeIcon(ico.id)}
                         className={`p-1.5 rounded-md flex flex-col items-center justify-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-indigo-50 border border-indigo-400 text-[#4f46e5]'
-                            : 'bg-transparent border border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900'
+                            ? 'bg-[#38bdf8]/20 border border-[#38bdf8] text-[#38bdf8]'
+                            : 'bg-transparent border border-transparent text-[#cdddf0]/60 hover:bg-[#1c3538] hover:text-[#cdddf0]'
                         }`}
                         title={ico.label}
                       >
@@ -385,7 +381,7 @@ export default function PresetsManager({
             {/* Work Type List */}
             <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
               {workTypes.length === 0 ? (
-                <div className="p-6 text-center border border-dashed border-neutral-200 rounded-xl text-xs text-neutral-400 font-medium">
+                <div className="p-6 text-center border border-dashed border-[#cdddf0]/20 rounded-xl text-xs text-[#cdddf0]/60 font-medium">
                   No work types added yet.
                 </div>
               ) : (
@@ -394,8 +390,8 @@ export default function PresetsManager({
                   return (
                     <div
                       key={wt.id}
-                      className={`p-3 border border-neutral-100 rounded-xl flex flex-col gap-2.5 transition-colors ${
-                        isEditing ? 'bg-neutral-50/55 p-4 border-neutral-200' : 'bg-white hover:bg-neutral-50/50'
+                      className={`p-3 border border-[#cdddf0]/15 rounded-xl flex flex-col gap-2.5 transition-colors ${
+                        isEditing ? 'bg-[#1c3538] p-4 border-[#cdddf0]/25' : 'bg-[#1c3538]/70 hover:bg-[#1c3538]'
                       }`}
                       id={`worktype-item-${wt.id}`}
                     >
@@ -405,15 +401,15 @@ export default function PresetsManager({
                             type="text"
                             value={editingWorkTypeName}
                             onChange={(e) => setEditingWorkTypeName(e.target.value)}
-                            className="flex-1 p-2 bg-white border border-neutral-200 rounded-lg text-xs font-medium mr-2"
+                            className="flex-1 p-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0] mr-2"
                             id={`edit-worktype-input-${wt.id}`}
                           />
                         ) : (
                           <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-full bg-neutral-50 border border-neutral-150 flex items-center justify-center text-indigo-600 shrink-0">
+                            <div className="w-7 h-7 rounded-full bg-[#224044] border border-[#cdddf0]/15 flex items-center justify-center text-[#38bdf8] shrink-0">
                               <Icon icon={wt.icon || 'mage:sparkles'} className="w-4 h-4" />
                             </div>
-                            <span className="font-medium text-neutral-800 text-xs">{wt.name}</span>
+                            <span className="font-semibold text-[#cdddf0] text-xs">{wt.name}</span>
                           </div>
                         )}
 
@@ -422,7 +418,7 @@ export default function PresetsManager({
                             <>
                               <button
                                 onClick={() => handleSaveWorkType(wt.id)}
-                                className="p-1 px-2.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-all cursor-pointer text-[10px] font-bold"
+                                className="p-1 px-2.5 bg-[#38bdf8] text-[#1c3538] rounded-lg hover:bg-[#7dd3fc] transition-all cursor-pointer text-[10px] font-bold"
                                 title="Save changes"
                                 id={`save-worktype-btn-${wt.id}`}
                               >
@@ -430,7 +426,7 @@ export default function PresetsManager({
                               </button>
                               <button
                                 onClick={() => setEditingWorkTypeId(null)}
-                                className="p-1 px-2.5 bg-white border border-neutral-200 text-neutral-600 rounded-lg hover:bg-neutral-50 transition-all cursor-pointer text-[10px] font-semibold"
+                                className="p-1 px-2.5 border border-[#cdddf0]/20 text-[#cdddf0]/70 rounded-lg hover:bg-[#27484d] transition-all cursor-pointer text-[10px] font-semibold"
                                 title="Cancel"
                                 id={`cancel-worktype-btn-${wt.id}`}
                               >
@@ -441,7 +437,7 @@ export default function PresetsManager({
                             <>
                               <button
                                 onClick={() => handleStartEditWorkType(wt)}
-                                className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 border border-neutral-200/60 rounded-xl transition-all cursor-pointer"
+                                className="p-1.5 text-[#cdddf0]/60 hover:text-[#38bdf8] hover:bg-[#27484d] border border-[#cdddf0]/15 rounded-xl transition-all cursor-pointer"
                                 title="Edit Type"
                                 id={`start-edit-worktype-btn-${wt.id}`}
                               >
@@ -449,7 +445,7 @@ export default function PresetsManager({
                               </button>
                               <button
                                 onClick={() => onDeleteWorkType(wt.id)}
-                                className="p-1.5 text-neutral-400 hover:text-rose-600 hover:bg-rose-50/50 border border-neutral-200/60 rounded-xl transition-all cursor-pointer"
+                                className="p-1.5 text-[#cdddf0]/60 hover:text-rose-400 hover:bg-rose-950/50 border border-[#cdddf0]/15 rounded-xl transition-all cursor-pointer"
                                 title="Delete Type"
                                 id={`delete-worktype-btn-${wt.id}`}
                               >
@@ -462,8 +458,8 @@ export default function PresetsManager({
 
                       {/* Edit mode Icon grid */}
                       {isEditing && (
-                        <div className="bg-white p-2.5 rounded-lg border border-neutral-200/80 space-y-1.5">
-                          <span className="block text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">
+                        <div className="bg-[#224044] p-2.5 rounded-lg border border-[#cdddf0]/20 space-y-1.5">
+                          <span className="block text-[10px] font-semibold text-[#cdddf0]/60 uppercase tracking-wider">
                             Choose Mage Icon:
                           </span>
                           <div className="grid grid-cols-6 gap-1">
@@ -476,8 +472,8 @@ export default function PresetsManager({
                                   onClick={() => setEditingWorkTypeIcon(ico.id)}
                                   className={`p-1.5 rounded flex items-center justify-center transition-all cursor-pointer ${
                                     isSelected
-                                      ? 'bg-indigo-50 border border-indigo-300 text-[#4f46e5]'
-                                      : 'bg-transparent border border-transparent text-neutral-500 hover:bg-neutral-50'
+                                      ? 'bg-[#38bdf8]/20 border border-[#38bdf8] text-[#38bdf8]'
+                                      : 'bg-transparent border border-transparent text-[#cdddf0]/60 hover:bg-[#1c3538]'
                                   }`}
                                   title={ico.label}
                                 >
@@ -496,15 +492,15 @@ export default function PresetsManager({
           </div>
 
           {/* Backup Panel */}
-          <div className="bg-white p-6 border border-neutral-100 shadow-sm rounded-2xl space-y-4">
-            <h3 className="text-base font-medium text-neutral-800 tracking-tight">
+          <div className="bg-[#224044] p-6 border border-[#cdddf0]/15 shadow-lg rounded-2xl space-y-4">
+            <h3 className="text-base font-semibold text-[#cdddf0] tracking-tight">
               Data Portability
             </h3>
 
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleExport}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 font-medium text-xs rounded-xl active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1c3538] hover:bg-[#27484d] border border-[#cdddf0]/20 text-[#cdddf0] font-medium text-xs rounded-xl active:scale-[0.98] transition-all duration-200 cursor-pointer"
                 id="export-data-btn"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -512,7 +508,7 @@ export default function PresetsManager({
               </button>
 
               <label
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 font-medium text-xs rounded-xl active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1c3538] hover:bg-[#27484d] border border-[#cdddf0]/20 text-[#cdddf0] font-medium text-xs rounded-xl active:scale-[0.98] transition-all duration-200 cursor-pointer"
                 id="import-data-label"
               >
                 <Upload className="w-3.5 h-3.5" />
@@ -528,7 +524,7 @@ export default function PresetsManager({
               <button
                 onClick={onLoadDemoData}
                 type="button"
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#4f46e5]/5 hover:bg-[#4f46e5]/10 border border-[#4f46e5]/20 text-[#4f46e5] font-semibold text-xs rounded-xl active:scale-[0.98] hover:shadow-xs transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#38bdf8]/15 hover:bg-[#38bdf8]/25 border border-[#38bdf8]/30 text-[#38bdf8] font-bold text-xs rounded-xl active:scale-[0.98] transition-all duration-200 cursor-pointer"
                 id="load-demo-btn"
               >
                 Load Sample Data
@@ -536,13 +532,13 @@ export default function PresetsManager({
             </div>
 
             {importSuccess && (
-              <div className="mt-3.5 p-2 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl text-xs font-medium" id="import-success-toast">
+              <div className="mt-3.5 p-2 bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-medium" id="import-success-toast">
                 ✓ Backup data imported successfully!
               </div>
             )}
 
             {importError && (
-              <div className="mt-3.5 p-2 bg-rose-50 text-rose-800 border border-rose-100 rounded-xl text-xs font-medium" id="import-error-toast">
+              <div className="mt-3.5 p-2 bg-rose-950/60 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-medium" id="import-error-toast">
                 ⚠ Error: {importError}
               </div>
             )}

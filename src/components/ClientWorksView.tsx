@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Client, WorkType, WorkEntry, QuickRange, Payment } from '../types';
 import { Icon } from '@iconify/react';
 import { 
@@ -38,8 +39,10 @@ export default function ClientWorksView({
   onEditEntry,
   onDeleteEntry,
 }: ClientWorksViewProps) {
-  // Navigation State
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  // Navigation via URL Route Params
+  const { clientId } = useParams<{ clientId?: string }>();
+  const navigate = useNavigate();
+  const selectedClientId = clientId || null;
 
   // General Overview Tab Toggles (when selectedClientId is null)
   const [overviewPeriod, setOverviewPeriod] = useState<'all' | 'this-month' | 'this-week'>('all');
@@ -302,16 +305,16 @@ export default function ClientWorksView({
         {/* CLIENTS & OVERVIEW SECTION */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h1 className="text-2xl font-medium tracking-tight text-neutral-900">Clients & Overview</h1>
+            <h1 className="text-2xl font-medium tracking-tight text-[#cdddf0]">Clients & Overview</h1>
             
             {/* OVERVIEW PERIOD SELECTOR */}
-            <div className="flex bg-neutral-100 p-0.5 rounded-full border border-neutral-200/40 w-max">
+            <div className="flex bg-[#1c3538] p-0.5 rounded-full border border-[#cdddf0]/15 w-max">
               <button
                 onClick={() => setOverviewPeriod('all')}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   overviewPeriod === 'all'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900'
+                    ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
+                    : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
                 }`}
               >
                 All Time
@@ -320,8 +323,8 @@ export default function ClientWorksView({
                 onClick={() => setOverviewPeriod('this-month')}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   overviewPeriod === 'this-month'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900'
+                    ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
+                    : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
                 }`}
               >
                 This Month
@@ -330,8 +333,8 @@ export default function ClientWorksView({
                 onClick={() => setOverviewPeriod('this-week')}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   overviewPeriod === 'this-week'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-500 hover:text-neutral-900'
+                    ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
+                    : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
                 }`}
               >
                 This Week
@@ -342,31 +345,31 @@ export default function ClientWorksView({
           {/* OVERVIEW STATS CARDS */}
           <div className="grid grid-cols-3 gap-4">
             {/* Total Gigs */}
-            <div className="bg-white border border-neutral-100 rounded-[1.8rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.015)] flex flex-col justify-between min-h-[110px]">
-              <span className="text-xs font-medium text-neutral-400">Total Gigs</span>
-              <span className="text-2xl font-medium text-neutral-900 mt-2">{totalGigsOverview}</span>
+            <div className="bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] p-5 shadow-lg flex flex-col justify-between min-h-[110px]">
+              <span className="text-xs font-medium text-[#cdddf0]/60">Total Gigs</span>
+              <span className="text-2xl font-bold text-[#cdddf0] mt-2">{totalGigsOverview}</span>
             </div>
 
             {/* Total Reels */}
-            <div className="bg-white border border-neutral-100 rounded-[1.8rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.015)] flex flex-col justify-between min-h-[110px]">
-              <span className="text-xs font-medium text-neutral-400">Total Reels</span>
-              <span className="text-2xl font-medium text-neutral-900 mt-2">{totalReelsOverview}</span>
+            <div className="bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] p-5 shadow-lg flex flex-col justify-between min-h-[110px]">
+              <span className="text-xs font-medium text-[#cdddf0]/60">Total Reels</span>
+              <span className="text-2xl font-bold text-[#cdddf0] mt-2">{totalReelsOverview}</span>
             </div>
 
             {/* Total Revenue */}
-            <div className="bg-[#4f46e5]/5 border border-indigo-100/30 rounded-[1.8rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.015)] flex flex-col justify-between min-h-[110px]">
-              <span className="text-xs font-medium text-[#4f46e5]">Total Revenue</span>
-              <span className="text-2xl font-medium text-[#4f46e5] mt-2">₹{totalRevenueOverview.toLocaleString()}</span>
+            <div className="bg-[#38bdf8]/10 border border-[#38bdf8]/30 rounded-[1.8rem] p-5 shadow-lg flex flex-col justify-between min-h-[110px]">
+              <span className="text-xs font-medium text-[#38bdf8]">Total Revenue</span>
+              <span className="text-2xl font-bold text-[#38bdf8] mt-2">₹{totalRevenueOverview.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
         {/* ALL CLIENTS LIST SECTION */}
         <div className="space-y-3.5 pt-2">
-          <h2 className="text-xl font-medium text-neutral-900 tracking-tight">All Clients</h2>
+          <h2 className="text-xl font-medium text-[#cdddf0] tracking-tight">All Clients</h2>
 
           {clients.length === 0 ? (
-            <div className="p-12 text-center bg-white border border-neutral-100 rounded-[1.8rem] text-neutral-400 font-medium text-sm shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
+            <div className="p-12 text-center bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] text-[#cdddf0]/60 font-medium text-sm">
               No clients added yet. Please configure clients in the Settings tab first.
             </div>
           ) : (
@@ -377,22 +380,22 @@ export default function ClientWorksView({
                   <button
                     key={client.id}
                     onClick={() => {
-                      setSelectedClientId(client.id);
+                      navigate('/clients/' + client.id);
                       handleResetFilters();
                     }}
-                    className="p-5 bg-white border border-neutral-100 rounded-[1.8rem] text-left transition-all hover:border-neutral-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex items-center justify-between cursor-pointer group"
+                    className="p-5 bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] text-left transition-all hover:border-[#38bdf8]/40 shadow-lg flex items-center justify-between cursor-pointer group"
                     id={`client-portfolio-${client.id}`}
                   >
                     <div className="flex-1 min-w-0 pr-3">
-                      <span className="font-medium text-neutral-900 group-hover:text-black transition-colors block text-base truncate">
+                      <span className="font-semibold text-[#cdddf0] group-hover:text-white transition-colors block text-base truncate">
                         {client.name}
                       </span>
-                      <span className="text-xs text-neutral-400 font-medium mt-1 block">
+                      <span className="text-xs text-[#cdddf0]/60 font-medium mt-1 block">
                         {count} {count === 1 ? 'gig' : 'gigs'}
                       </span>
                     </div>
 
-                    <div className="w-8 h-8 rounded-full bg-neutral-50 border border-neutral-100 flex items-center justify-center text-neutral-400 group-hover:bg-neutral-100 group-hover:text-neutral-700 transition-colors shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-[#1c3538] border border-[#cdddf0]/15 flex items-center justify-center text-[#cdddf0]/60 group-hover:text-[#38bdf8] transition-colors shrink-0">
                       <ChevronRight className="w-4 h-4" />
                     </div>
                   </button>
@@ -405,32 +408,32 @@ export default function ClientWorksView({
     );
   }
 
-  // 2. Render Selected Client Page with beautiful flat minimalist design matching screenshots
+  // 2. Render Selected Client Page
   return (
     <div className="space-y-6 animate-fade-in font-sans">
       {/* BACK NAVIGATION */}
       <div>
         <button
           onClick={() => {
-            setSelectedClientId(null);
+            navigate('/clients');
             setIsAddingPayment(false);
           }}
-          className="text-sm font-medium text-neutral-400 hover:text-neutral-900 flex items-center gap-1 cursor-pointer mb-2 transition-colors"
+          className="text-sm font-medium text-[#cdddf0]/70 hover:text-[#38bdf8] flex items-center gap-1 cursor-pointer mb-2 transition-colors"
           id="back-to-clients-btn"
         >
           <span>&larr;</span>
           <span>All Clients</span>
         </button>
 
-        <h1 className="text-2xl font-medium text-neutral-900 tracking-tight">
+        <h1 className="text-2xl font-bold text-[#cdddf0] tracking-tight">
           {activeClient?.name}
         </h1>
       </div>
 
-      {/* SUBTLE NEUTRAL DIVIDER */}
-      <div className="border-b border-neutral-100/85 my-3" />
+      {/* SUBTLE DIVIDER */}
+      <div className="border-b border-[#cdddf0]/10 my-3" />
 
-      {/* FILTER CONTROLS BAR (Pills and Dropdown) */}
+      {/* FILTER CONTROLS BAR */}
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* TIMELINE PILL SELECTORS */}
@@ -450,8 +453,8 @@ export default function ClientWorksView({
                 }}
                 className={`px-4.5 py-2.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
                   !showCustomDates && selectedQuickRange === range.key
-                    ? 'bg-neutral-900 text-white'
-                    : 'bg-neutral-100/80 text-neutral-500 hover:bg-neutral-200/70'
+                    ? 'bg-[#38bdf8] text-[#1c3538] font-bold shadow-md'
+                    : 'bg-[#1c3538] text-[#cdddf0]/70 hover:bg-[#27484d] hover:text-[#cdddf0]'
                 }`}
                 id={`client-quick-range-${range.key}`}
               >
@@ -460,22 +463,22 @@ export default function ClientWorksView({
             ))}
           </div>
 
-          {/* WORK TYPE DROPDOWN (ALIGNED TO THE RIGHT AS IN SCREENSHOT) */}
+          {/* WORK TYPE DROPDOWN */}
           <div className="relative shrink-0 min-w-[190px]">
             <select
               id="client-wt-select"
               value={selectedWorkTypeId}
               onChange={(e) => setSelectedWorkTypeId(e.target.value)}
-              className="w-full pl-5 pr-11 py-2.5 bg-white border border-neutral-200/80 rounded-full text-xs font-semibold text-neutral-700 focus:outline-none appearance-none cursor-pointer hover:border-neutral-300 transition-colors shadow-sm"
+              className="w-full pl-5 pr-11 py-2.5 bg-[#224044] border border-[#cdddf0]/20 rounded-full text-xs font-semibold text-[#cdddf0] focus:outline-none appearance-none cursor-pointer hover:border-[#38bdf8]/40 transition-colors shadow-sm"
             >
               <option value="all">All Work Types</option>
               {workTypes.map((wt) => (
-                <option key={wt.id} value={wt.id}>
+                <option key={wt.id} value={wt.id} className="bg-[#1c3538] text-[#cdddf0]">
                   {wt.name}
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-neutral-400">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#cdddf0]/60">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
               </svg>
@@ -483,18 +486,18 @@ export default function ClientWorksView({
           </div>
         </div>
 
-        {/* CUSTOM RANGE PILL SHOWN BELOW THE MAIN PILLS AS IN THE IMAGE */}
+        {/* CUSTOM RANGE PILL */}
         <div className="flex justify-start">
           <button
             onClick={() => setShowCustomDates(!showCustomDates)}
             className={`px-4.5 py-2.5 text-xs font-semibold rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
               showCustomDates
-                ? 'bg-neutral-800 text-white shadow-sm'
-                : 'bg-neutral-100/80 text-neutral-500 hover:bg-neutral-200/70'
+                ? 'bg-[#38bdf8] text-[#1c3538] font-bold shadow-sm'
+                : 'bg-[#1c3538] text-[#cdddf0]/70 hover:bg-[#27484d] hover:text-[#cdddf0]'
             }`}
             id="custom-date-toggle-btn"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-400" />
+            <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>Custom Range</span>
           </button>
         </div>
@@ -502,9 +505,9 @@ export default function ClientWorksView({
 
       {/* CUSTOM RANGE PICKERS */}
       {showCustomDates && (
-        <div className="p-4 bg-neutral-50 rounded-2xl border border-neutral-100 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+        <div className="p-4 bg-[#1c3538] rounded-2xl border border-[#cdddf0]/15 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
           <div>
-            <label htmlFor="client-from-date" className="block text-[11px] font-medium text-neutral-400 uppercase tracking-wider mb-1">
+            <label htmlFor="client-from-date" className="block text-[11px] font-medium text-[#cdddf0]/60 uppercase tracking-wider mb-1">
               Completed From
             </label>
             <input
@@ -512,11 +515,11 @@ export default function ClientWorksView({
               type="date"
               value={customFromDate}
               onChange={(e) => setCustomFromDate(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-xs font-medium"
+              className="w-full px-3 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0]"
             />
           </div>
           <div>
-            <label htmlFor="client-to-date" className="block text-[11px] font-medium text-neutral-400 uppercase tracking-wider mb-1">
+            <label htmlFor="client-to-date" className="block text-[11px] font-medium text-[#cdddf0]/60 uppercase tracking-wider mb-1">
               Completed To
             </label>
             <input
@@ -524,7 +527,7 @@ export default function ClientWorksView({
               type="date"
               value={customToDate}
               onChange={(e) => setCustomToDate(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-xs font-medium"
+              className="w-full px-3 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0]"
             />
           </div>
         </div>
@@ -533,37 +536,37 @@ export default function ClientWorksView({
       {/* CLIENT SPECIFIC STATS CARDS */}
       <div className="grid grid-cols-3 gap-4">
         {/* Total Gigs */}
-        <div className="bg-white border border-neutral-100 rounded-[1.8rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.015)] flex flex-col justify-between min-h-[110px]">
-          <span className="text-xs font-medium text-neutral-400">Total Gigs</span>
-          <span className="text-2xl font-medium text-neutral-900 mt-2">{clientFilteredGigs}</span>
+        <div className="bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] p-5 shadow-lg flex flex-col justify-between min-h-[110px]">
+          <span className="text-xs font-medium text-[#cdddf0]/60">Total Gigs</span>
+          <span className="text-2xl font-bold text-[#cdddf0] mt-2">{clientFilteredGigs}</span>
         </div>
 
         {/* Total Reels */}
-        <div className="bg-white border border-neutral-100 rounded-[1.8rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.015)] flex flex-col justify-between min-h-[110px]">
-          <span className="text-xs font-medium text-neutral-400">Total Reels</span>
-          <span className="text-2xl font-medium text-neutral-900 mt-2">{clientFilteredReels}</span>
+        <div className="bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] p-5 shadow-lg flex flex-col justify-between min-h-[110px]">
+          <span className="text-xs font-medium text-[#cdddf0]/60">Total Reels</span>
+          <span className="text-2xl font-bold text-[#cdddf0] mt-2">{clientFilteredReels}</span>
         </div>
 
         {/* Total Revenue */}
-        <div className="bg-[#4f46e5]/5 border border-indigo-100/30 rounded-[1.8rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.015)] flex flex-col justify-between min-h-[110px]">
-          <span className="text-xs font-medium text-[#4f46e5]">Total Revenue</span>
-          <span className="text-2xl font-medium text-[#4f46e5] mt-2">₹{clientFilteredRevenue.toLocaleString()}</span>
+        <div className="bg-[#38bdf8]/10 border border-[#38bdf8]/30 rounded-[1.8rem] p-5 shadow-lg flex flex-col justify-between min-h-[110px]">
+          <span className="text-xs font-medium text-[#38bdf8]">Total Revenue</span>
+          <span className="text-2xl font-bold text-[#38bdf8] mt-2">₹{clientFilteredRevenue.toLocaleString()}</span>
         </div>
       </div>
 
       {/* HORIZONTAL DIVIDER */}
-      <div className="border-b border-neutral-100" />
+      <div className="border-b border-[#cdddf0]/10" />
 
-      {/* PAYMENTS & EARNINGS SECTION AT THE TOP */}
+      {/* PAYMENTS & EARNINGS SECTION */}
       <div className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-medium text-neutral-900 tracking-tight">
+          <h2 className="text-xl font-medium text-[#cdddf0] tracking-tight">
             Payments & Earnings
           </h2>
 
           <button
             onClick={() => setIsAddingPayment(!isAddingPayment)}
-            className="px-4 py-1.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white rounded-full text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm"
+            className="px-4 py-1.5 bg-[#38bdf8] hover:bg-[#7dd3fc] text-[#1c3538] rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm"
           >
             {isAddingPayment ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
             <span>{isAddingPayment ? 'Cancel' : 'Add Payment'}</span>
@@ -572,11 +575,11 @@ export default function ClientWorksView({
 
         {/* INLINE PAYMENT FORM */}
         {isAddingPayment && (
-          <form onSubmit={handlePaymentSubmit} className="p-5 bg-neutral-50 rounded-[1.8rem] border border-neutral-100 space-y-4 animate-fade-in">
-            <h3 className="text-xs font-medium text-neutral-800">Record a Received Payment</h3>
+          <form onSubmit={handlePaymentSubmit} className="p-5 bg-[#1c3538] rounded-[1.8rem] border border-[#cdddf0]/15 space-y-4 animate-fade-in">
+            <h3 className="text-xs font-medium text-[#cdddf0]">Record a Received Payment</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-medium text-[#cdddf0]/60 uppercase tracking-wider mb-1.5">
                   Payment Amount (₹)
                 </label>
                 <input
@@ -586,12 +589,12 @@ export default function ClientWorksView({
                   placeholder="e.g. 15000"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
-                  className="w-full px-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs font-medium focus:outline-none focus:border-neutral-400"
+                  className="w-full px-4 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-xl text-xs font-medium text-[#cdddf0] focus:outline-none focus:border-[#38bdf8]"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-1.5">
+                <label className="block text-[10px] font-medium text-[#cdddf0]/60 uppercase tracking-wider mb-1.5">
                   Payment Date
                 </label>
                 <input
@@ -599,13 +602,13 @@ export default function ClientWorksView({
                   required
                   value={paymentDate}
                   onChange={(e) => setPaymentDate(e.target.value)}
-                  className="w-full px-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs font-medium focus:outline-none focus:border-neutral-400"
+                  className="w-full px-4 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-xl text-xs font-medium text-[#cdddf0] focus:outline-none focus:border-[#38bdf8]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-[10px] font-medium text-[#cdddf0]/60 uppercase tracking-wider mb-1.5">
                 Payment Note / Description (Optional)
               </label>
               <input
@@ -613,7 +616,7 @@ export default function ClientWorksView({
                 placeholder="e.g. Upfront deposit for 3-part series"
                 value={paymentNote}
                 onChange={(e) => setPaymentNote(e.target.value)}
-                className="w-full px-4 py-2 bg-white border border-neutral-200 rounded-xl text-xs font-medium focus:outline-none focus:border-neutral-400"
+                className="w-full px-4 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-xl text-xs font-medium text-[#cdddf0] focus:outline-none focus:border-[#38bdf8]"
               />
             </div>
 
@@ -621,25 +624,23 @@ export default function ClientWorksView({
               <button
                 type="button"
                 onClick={() => setIsAddingPayment(false)}
-                className="px-4 py-1.5 border border-neutral-200 text-neutral-600 hover:bg-neutral-100 rounded-full text-xs font-medium transition-all cursor-pointer"
+                className="px-4 py-1.5 border border-[#cdddf0]/20 text-[#cdddf0]/70 hover:bg-[#27484d] rounded-full text-xs font-medium transition-all cursor-pointer"
               >
                 Close
               </button>
-              <div className="p-[1px] rounded-full bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.98]">
-                <button
-                  type="submit"
-                  className="px-5 py-1 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow-[inset_0_1px_0_rgba(255,255,255,0.3),inset_0_-1px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5]"
-                >
-                  Log Payment Record
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="px-5 py-1.5 bg-[#38bdf8] hover:bg-[#7dd3fc] text-[#1c3538] rounded-full text-xs font-bold transition-all cursor-pointer shadow-md"
+              >
+                Log Payment Record
+              </button>
             </div>
           </form>
         )}
 
-        {/* PAYMENTS LIST (FLAT ROW LAYOUT CARDS, AMOUNT MOVED TO RIGHT CORNER) */}
+        {/* PAYMENTS LIST */}
         {filteredPayments.length === 0 ? (
-          <div className="p-8 text-center bg-white border border-neutral-100 rounded-[1.8rem] text-neutral-400 font-medium text-xs shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
+          <div className="p-8 text-center bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] text-[#cdddf0]/60 font-medium text-xs">
             No payments logged for this client matching the filter.
           </div>
         ) : (
@@ -649,29 +650,27 @@ export default function ClientWorksView({
               return (
                 <div
                   key={payment.id}
-                  className="group relative bg-white border border-neutral-100 rounded-[1.8rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:border-neutral-200/80 transition-all flex items-center justify-between gap-4"
+                  className="group relative bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] p-4 shadow-lg flex items-center justify-between gap-4"
                 >
                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                    {/* Vertical date block - Month and day only */}
-                    <div className="flex flex-col items-center justify-center shrink-0 text-center font-sans pr-4 border-r border-neutral-100 min-w-[50px]">
-                      <span className="text-[9px] font-medium text-neutral-400 uppercase leading-none">{payDateBlock.month}</span>
-                      <span className="text-sm font-medium text-neutral-900 leading-none mt-1">{payDateBlock.day}</span>
+                    <div className="flex flex-col items-center justify-center shrink-0 text-center font-sans pr-4 border-r border-[#cdddf0]/15 min-w-[50px]">
+                      <span className="text-[9px] font-medium text-[#cdddf0]/60 uppercase leading-none">{payDateBlock.month}</span>
+                      <span className="text-sm font-bold text-[#cdddf0] leading-none mt-1">{payDateBlock.day}</span>
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <span className="text-sm font-medium text-neutral-600 truncate block">
+                      <span className="text-sm font-medium text-[#cdddf0] truncate block">
                         {payment.note || 'Payment Received'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Amount on the right corner, with delete button */}
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-emerald-600 font-medium text-base">₹{payment.amount.toLocaleString()}</span>
+                    <span className="text-[#38bdf8] font-bold text-base">₹{payment.amount.toLocaleString()}</span>
                     
                     <button
                       onClick={() => onDeletePayment(payment.id)}
-                      className="opacity-40 group-hover:opacity-100 p-1.5 text-neutral-400 hover:text-rose-600 rounded-xl transition-all cursor-pointer shrink-0"
+                      className="opacity-40 group-hover:opacity-100 p-1.5 text-[#cdddf0]/60 hover:text-rose-400 rounded-xl transition-all cursor-pointer shrink-0"
                       title="Delete payment record"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -684,24 +683,24 @@ export default function ClientWorksView({
         )}
       </div>
 
-      {/* HORIZONTAL DIVIDER BETWEEN PAYMENTS AND COMPLETED WORK ENTRIES */}
-      <div className="border-b border-neutral-100" />
+      {/* HORIZONTAL DIVIDER */}
+      <div className="border-b border-[#cdddf0]/10" />
 
       {/* WORK LOGS ENTRIES SECTION */}
       <div className="space-y-3.5 pt-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-medium text-neutral-900 tracking-tight">
+          <h2 className="text-xl font-medium text-[#cdddf0] tracking-tight">
             Completed Gigs
           </h2>
-          <div className="text-xs font-medium text-neutral-400">
+          <div className="text-xs font-medium text-[#cdddf0]/60">
             {filteredEntries.length} {filteredEntries.length === 1 ? 'Entry Found' : 'Entries Found'}
           </div>
         </div>
 
         {filteredEntries.length === 0 ? (
-          <div className="p-12 text-center bg-white border border-neutral-100 rounded-[1.8rem] shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
-            <Clock className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-            <h3 className="text-sm font-medium text-neutral-800">No logs match the criteria</h3>
+          <div className="p-12 text-center bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] shadow-lg">
+            <Clock className="w-8 h-8 text-[#cdddf0]/40 mx-auto mb-2" />
+            <h3 className="text-sm font-medium text-[#cdddf0]/70">No logs match the criteria</h3>
           </div>
         ) : (
           <div className="space-y-3.5">
@@ -712,31 +711,27 @@ export default function ClientWorksView({
               return (
                 <div
                   key={entry.id}
-                  className="group relative bg-white border border-neutral-100/70 rounded-[1.8rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:border-neutral-200/80 transition-all flex items-center justify-between gap-4"
+                  className="group relative bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] p-5 shadow-lg flex items-center justify-between gap-4"
                   id={`client-log-card-${entry.id}`}
                 >
-                  {/* LEFT: VERTICAL DATE + DETAILS */}
                   <div className="flex items-center gap-5 flex-1 min-w-0">
-                    {/* VERTICAL DATE BLOCK - MONTH & DATE ONLY */}
-                    <div className="flex flex-col items-center justify-center shrink-0 text-center font-sans pr-5 border-r border-neutral-100/80 min-w-[50px]">
-                      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider leading-none">{dateBlock.month}</span>
-                      <span className="text-xl font-medium text-neutral-900 leading-none mt-1.5">{dateBlock.day}</span>
+                    <div className="flex flex-col items-center justify-center shrink-0 text-center font-sans pr-5 border-r border-[#cdddf0]/15 min-w-[50px]">
+                      <span className="text-[10px] font-medium text-[#cdddf0]/60 uppercase tracking-wider leading-none">{dateBlock.month}</span>
+                      <span className="text-xl font-bold text-[#cdddf0] leading-none mt-1.5">{dateBlock.day}</span>
                     </div>
 
-                    {/* CONTENT CONTAINER */}
                     <div className="space-y-1 flex-1 min-w-0">
-                      <h3 className="text-base font-medium text-neutral-900 leading-snug flex items-center gap-1.5 flex-wrap tracking-tight">
+                      <h3 className="text-base font-semibold text-[#cdddf0] leading-snug flex items-center gap-1.5 flex-wrap tracking-tight">
                         <span>{entry.title}</span>
                         {entry.notes && (
                           <div className="group/tooltip relative inline-block">
                             <span 
-                              className="w-1.5 h-1.5 rounded-full bg-[#4f46e5] inline-block animate-pulse shrink-0 cursor-help" 
+                              className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] inline-block animate-pulse shrink-0 cursor-help" 
                               title="Has work notes" 
                             />
-                            {/* Rich Tooltip on Hover */}
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-50 bg-neutral-900 text-white text-[11px] p-2.5 rounded-xl shadow-lg w-56 font-sans font-medium text-center leading-relaxed">
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-50 bg-[#162a2d] text-[#cdddf0] border border-[#cdddf0]/20 text-[11px] p-2.5 rounded-xl shadow-lg w-56 font-sans font-medium text-center leading-relaxed">
                               {entry.notes}
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-neutral-900" />
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#162a2d]" />
                             </div>
                           </div>
                         )}
@@ -744,34 +739,29 @@ export default function ClientWorksView({
                     </div>
                   </div>
 
-                  {/* RIGHT BLOCK: WORK TYPE ICON + THREE-DOT BUTTON */}
                   <div className="flex items-center gap-3 shrink-0 relative">
-                    {/* Rounded Icon Representing Work Type */}
                     <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center border border-indigo-100 bg-indigo-50/50 text-[#4f46e5] shadow-sm"
+                      className="w-10 h-10 rounded-full flex items-center justify-center border border-[#38bdf8]/30 bg-[#38bdf8]/10 text-[#38bdf8] shadow-sm"
                       title={typeObj ? typeObj.name : 'Work Type'}
                     >
                       <Icon icon={typeObj?.icon || 'mage:sparkles'} className="w-5 h-5" />
                     </div>
 
-                    {/* iOS Style Popover Action Button */}
                     <div className="relative">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveMenuId(activeMenuId === entry.id ? null : entry.id);
                         }}
-                        className="p-2 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 rounded-full transition-colors cursor-pointer"
+                        className="p-2 text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#1c3538] rounded-full transition-colors cursor-pointer"
                         title="Actions"
                         id={`client-actions-trigger-${entry.id}`}
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
 
-                      {/* Popover Dropdown Menu */}
                       {activeMenuId === entry.id && (
                         <>
-                          {/* Transparent backdrop to close menu on click outside */}
                           <div 
                             className="fixed inset-0 z-30" 
                             onClick={(e) => {
@@ -779,16 +769,16 @@ export default function ClientWorksView({
                               setActiveMenuId(null);
                             }} 
                           />
-                          <div className="absolute right-0 mt-2 w-32 bg-white border border-neutral-100 rounded-2xl shadow-xl py-1.5 z-40 animate-fade-in text-left">
+                          <div className="absolute right-0 mt-2 w-32 bg-[#1c3538] border border-[#cdddf0]/20 rounded-2xl shadow-xl py-1.5 z-40 animate-fade-in text-left">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setActiveMenuId(null);
                                 onEditEntry(entry);
                               }}
-                              className="w-full text-left px-4 py-2 hover:bg-neutral-50 text-xs font-medium text-neutral-700 flex items-center gap-2 cursor-pointer"
+                              className="w-full text-left px-4 py-2 hover:bg-[#27484d] text-xs font-medium text-[#cdddf0] flex items-center gap-2 cursor-pointer"
                             >
-                              <Edit2 className="w-3.5 h-3.5 text-neutral-400" />
+                              <Edit2 className="w-3.5 h-3.5 text-[#38bdf8]" />
                               <span>Edit Gig</span>
                             </button>
                             <button
@@ -797,7 +787,7 @@ export default function ClientWorksView({
                                 setActiveMenuId(null);
                                 onDeleteEntry(entry.id);
                               }}
-                              className="w-full text-left px-4 py-2 hover:bg-rose-50 text-xs font-medium text-rose-600 flex items-center gap-2 cursor-pointer"
+                              className="w-full text-left px-4 py-2 hover:bg-rose-950/50 text-xs font-medium text-rose-400 flex items-center gap-2 cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5 text-rose-400" />
                               <span>Delete Gig</span>

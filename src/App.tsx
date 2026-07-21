@@ -87,7 +87,7 @@ function AppContent() {
   const navigate = useNavigate();
 
   // Determine active tab from route path
-  const activeTab = location.pathname === '/clients' ? 'clients' :
+  const activeTab = location.pathname.startsWith('/clients') ? 'clients' :
                     location.pathname === '/presets' ? 'presets' : 'logs';
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
@@ -547,16 +547,16 @@ function AppContent() {
   return (
     <div className="min-h-screen text-neutral-800 pb-32">
       {/* UNIQUE ORBIT LOGO HEADER */}
-      <header className="border-b border-neutral-100 bg-white/75 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40">
+      <header className="border-b border-[#cdddf0]/10 bg-[#244347]/80 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40">
         <div className="max-w-3xl mx-auto flex items-center justify-center">
           <div className="flex items-center gap-2.5">
-            <span className="text-[#4f46e5]" id="header-orbit-icon">
+            <span className="text-[#38bdf8]" id="header-orbit-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
                 <path fill="currentColor" d="M9.305 22.243a.8.8 0 0 1-.22 0a10.47 10.47 0 0 1-4.5-2.83a10.49 10.49 0 0 1-2.448-10A10.5 10.5 0 0 1 4.82 4.819a10.47 10.47 0 0 1 9.902-2.765a10.47 10.47 0 0 1 4.669 2.54a10.5 10.5 0 0 1 2.822 4.51a.743.743 0 0 1-1.059.886a.76.76 0 0 1-.37-.436a9 9 0 0 0-2.41-3.894a8.99 8.99 0 0 0-8.585-2.143a9 9 0 0 0-3.953 2.306a9.01 9.01 0 0 0-2.377 8.536a8.99 8.99 0 0 0 6.075 6.443a.77.77 0 0 1 .49 1a.75.75 0 0 1-.72.44"/>
               </svg>
             </span>
-            <span className="text-base font-bold tracking-tight text-neutral-950 font-sans lowercase">
+            <span className="text-base font-bold tracking-tight text-[#cdddf0] font-sans lowercase">
               orbit
             </span>
           </div>
@@ -569,13 +569,13 @@ function AppContent() {
           <Route path="/" element={
             <div className="space-y-6">
               {/* LARGE HERO MINIMAL INITIATOR */}
-              <div className="p-[1px] rounded-full bg-gradient-to-b from-indigo-300 to-indigo-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99]">
+              <div className="p-[1px] rounded-full bg-gradient-to-b from-sky-300 to-sky-700 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.99]">
                 <button
                   onClick={() => {
                     setEditingEntry(null);
                     setIsAdding(true);
                   }}
-                  className="w-full text-center py-4 px-6 bg-gradient-to-b from-[#4f46e5] to-[#4338ca] text-white font-bold text-sm rounded-full tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[inset_0_1.5px_0_rgba(255,255,255,0.3),inset_0_-1.5px_0_rgba(0,0,0,0.15)] hover:from-[#5c54f1] hover:to-[#4f46e5]"
+                  className="w-full text-center py-4 px-6 bg-gradient-to-b from-[#38bdf8] to-[#0284c7] text-[#1c3538] font-bold text-sm rounded-full tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[inset_0_1.5px_0_rgba(255,255,255,0.4),inset_0_-1.5px_0_rgba(0,0,0,0.2)] hover:from-[#7dd3fc] hover:to-[#38bdf8]"
                   id="primary-initiator-btn"
                 >
                   <Plus className="w-4 h-4" />
@@ -584,7 +584,7 @@ function AppContent() {
               </div>
 
               {/* LIGHT DOTTED LINE BETWEEN INITIATOR BUTTON AND RECENT GIGS */}
-              <div className="border-t-2 border-dotted border-neutral-200/80 my-8" />
+              <div className="border-t-2 border-dotted border-[#cdddf0]/20 my-8" />
 
               {/* PLAIN LIST UNDERNEATH */}
               <RecentWorksList
@@ -599,6 +599,21 @@ function AppContent() {
           } />
 
           <Route path="/clients" element={
+            <div className="animate-fade-in">
+              <ClientWorksView
+                entries={workEntries}
+                clients={clients}
+                workTypes={workTypes}
+                payments={payments}
+                onAddPayment={handleAddPayment}
+                onDeletePayment={handleDeletePayment}
+                onEditEntry={handleStartEditEntry}
+                onDeleteEntry={handleDeleteEntry}
+              />
+            </div>
+          } />
+
+          <Route path="/clients/:clientId" element={
             <div className="animate-fade-in">
               <ClientWorksView
                 entries={workEntries}
@@ -635,8 +650,8 @@ function AppContent() {
 
       {/* MODAL OVERLAY FOR LOG ENTRY FORM */}
       {isAdding && (
-        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
-          <div className="w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl relative my-auto overflow-hidden">
+        <div className="fixed inset-0 bg-[#162a2d]/70 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-4xl bg-[#203b3f] border border-[#cdddf0]/20 rounded-[2rem] shadow-2xl relative my-auto overflow-hidden">
             <WorkEntryForm
               clients={clients}
               workTypes={workTypes}
@@ -653,7 +668,7 @@ function AppContent() {
 
       {/* FLOATING BOTTOM CENTER NAVIGATION BAR */}
       <nav
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-md border border-neutral-200/50 rounded-full p-1.5 shadow-xl z-50 flex items-center gap-1.5 max-w-[95%] w-max font-sans"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#203c40]/90 backdrop-blur-md border border-[#cdddf0]/20 rounded-full p-1.5 shadow-2xl z-50 flex items-center gap-1.5 max-w-[95%] w-max font-sans"
         id="floating-bottom-nav"
       >
         <button
@@ -662,8 +677,8 @@ function AppContent() {
           }}
           className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
             activeTab === 'logs'
-              ? 'bg-[#4f46e5] text-white shadow-md scale-105'
-              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+              ? 'bg-[#38bdf8] text-[#1c3538] shadow-md scale-105'
+              : 'text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#2c4e52]'
           }`}
           id="nav-btn-logs"
           title="Home"
@@ -677,8 +692,8 @@ function AppContent() {
           }}
           className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
             activeTab === 'clients'
-              ? 'bg-[#4f46e5] text-white shadow-md scale-105'
-              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+              ? 'bg-[#38bdf8] text-[#1c3538] shadow-md scale-105'
+              : 'text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#2c4e52]'
           }`}
           id="nav-btn-clients"
           title="Clients"
@@ -692,8 +707,8 @@ function AppContent() {
           }}
           className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
             activeTab === 'presets'
-              ? 'bg-[#4f46e5] text-white shadow-md scale-105'
-              : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50'
+              ? 'bg-[#38bdf8] text-[#1c3538] shadow-md scale-105'
+              : 'text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#2c4e52]'
           }`}
           id="nav-btn-presets"
           title="Settings"
@@ -704,7 +719,7 @@ function AppContent() {
       
       {/* GIANT FIXED BACKGROUND LOGO (BOTTOM 20% CUT OFF) */}
       <div className="fixed bottom-0 left-0 right-0 h-[24vh] pointer-events-none z-[-1] overflow-hidden flex items-end justify-center select-none">
-        <h1 className="text-[22vw] font-bold text-neutral-900/[0.03] leading-none -mb-[4.4vw] tracking-tighter select-none font-sans lowercase">
+        <h1 className="text-[22vw] font-bold text-[#cdddf0]/[0.05] leading-none -mb-[4.4vw] tracking-tighter select-none font-sans lowercase">
           orbit
         </h1>
       </div>
