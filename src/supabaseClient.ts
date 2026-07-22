@@ -9,4 +9,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// If env vars are provided, initialize the real client. Otherwise export a
+// lightweight stub that provides the commonly used `from()` chain methods so
+// the app can continue running in local-only mode without throwing.
+let _supabase: any = null;
+
+if (supabaseUrl && supabaseAnonKey) {
+  _supabase = createClient(supabaseUrl, supabaseAnonKey);
+} else {
+  const noopResponse = async () => ({ data: [], error: null });
+  _supabase = {
+    from: (_: string) => ({
+      select: noopResponse,
+      insert: noopResponse,
+      update: noopResponse,
+      delete: noopResponse,
+      upsert: noopResponse,
+    }),
+  };
+}
+
+export const supabase = _supabase;

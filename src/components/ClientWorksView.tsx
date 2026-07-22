@@ -306,38 +306,47 @@ export default function ClientWorksView({
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h1 className="text-2xl font-medium tracking-tight text-[#cdddf0]">Clients & Overview</h1>
-            
-            {/* OVERVIEW PERIOD SELECTOR */}
-            <div className="flex bg-[#1c3538] p-0.5 rounded-full border border-[#cdddf0]/15 w-max">
+
+            <div className="flex items-center gap-3">
+              {/* OVERVIEW PERIOD SELECTOR */}
+              <div className="flex bg-[#1c3538] p-0.5 rounded-full border border-[#cdddf0]/15 w-max">
+                <button
+                  onClick={() => setOverviewPeriod('all')}
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                    overviewPeriod === 'all'
+                      ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
+                      : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
+                  }`}
+                >
+                  All Time
+                </button>
+                <button
+                  onClick={() => setOverviewPeriod('this-month')}
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                    overviewPeriod === 'this-month'
+                      ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
+                      : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
+                  }`}
+                >
+                  This Month
+                </button>
+                <button
+                  onClick={() => setOverviewPeriod('this-week')}
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                    overviewPeriod === 'this-week'
+                      ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
+                      : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
+                  }`}
+                >
+                  This Week
+                </button>
+              </div>
+
               <button
-                onClick={() => setOverviewPeriod('all')}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                  overviewPeriod === 'all'
-                    ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
-                    : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
-                }`}
+                onClick={() => navigate('/presets')}
+                className="px-4 py-1.5 bg-[#38bdf8] hover:bg-[#7dd3fc] text-[#1c3538] rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm"
               >
-                All Time
-              </button>
-              <button
-                onClick={() => setOverviewPeriod('this-month')}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                  overviewPeriod === 'this-month'
-                    ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
-                    : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
-                }`}
-              >
-                This Month
-              </button>
-              <button
-                onClick={() => setOverviewPeriod('this-week')}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                  overviewPeriod === 'this-week'
-                    ? 'bg-[#38bdf8] text-[#1c3538] shadow-sm font-bold'
-                    : 'text-[#cdddf0]/70 hover:text-[#cdddf0]'
-                }`}
-              >
-                This Week
+                <span>Add Client</span>
               </button>
             </div>
           </div>

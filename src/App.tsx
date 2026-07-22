@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import PresetsManager from './components/PresetsManager';
+import PaymentsView from './components/PaymentsView';
 import WorkEntryForm from './components/WorkEntryForm';
 import RecentWorksList from './components/RecentWorksList';
 import ClientWorksView from './components/ClientWorksView';
@@ -88,6 +89,7 @@ function AppContent() {
 
   // Determine active tab from route path
   const activeTab = location.pathname.startsWith('/clients') ? 'clients' :
+                    location.pathname.startsWith('/payments') ? 'payments' :
                     location.pathname === '/presets' ? 'presets' : 'logs';
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
@@ -487,54 +489,54 @@ function AppContent() {
 
   if (isAuthConfigured && !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
-        <div className="w-full max-w-sm bg-white rounded-3xl border border-neutral-200/80 p-8 shadow-xl">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-[#203b3f] rounded-3xl border border-[#cdddf0]/20 p-8 shadow-xl">
           <div className="flex flex-col items-center gap-3 mb-6">
-            <span className="text-[#4f46e5]">
+            <span className="text-[#38bdf8]">
               <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M21.773 14.768c-.029.414-.186.81-.45 1.13a1.9 1.9 0 0 1-.998.63l-3.157.521l-.09.09a.4.4 0 0 0-.09.15l-.5 2.902a1.92 1.92 0 0 1-1.778 1.471h-.09c-.374 0-.74-.111-1.05-.32a1.9 1.9 0 0 1-.739-.92l-2.787-7.906a1.9 1.9 0 0 1 .45-2.001c.253-.263.58-.44.939-.51a1.87 1.87 0 0 1 1.069.07l7.992 2.781c.404.135.754.394 1 .74c.215.351.313.761.28 1.172"/>
                 <path fill="currentColor" d="M9.305 22.243a.8.8 0 0 1-.22 0a10.47 10.47 0 0 1-4.5-2.83a10.49 10.49 0 0 1-2.448-10A10.5 10.5 0 0 1 4.82 4.819a10.47 10.47 0 0 1 9.902-2.765a10.47 10.47 0 0 1 4.669 2.54a10.5 10.5 0 0 1 2.822 4.51a.743.743 0 0 1-1.059.886a.76.76 0 0 1-.37-.436a9 9 0 0 0-2.41-3.894a8.99 8.99 0 0 0-8.585-2.143a9 9 0 0 0-3.953 2.306a9.01 9.01 0 0 0-2.377 8.536a8.99 8.99 0 0 0 6.075 6.443a.77.77 0 0 1 .49 1a.75.75 0 0 1-.72.44"/>
               </svg>
             </span>
-            <h1 className="text-xl font-bold tracking-tight text-neutral-950 font-sans lowercase">
+            <h1 className="text-xl font-bold tracking-tight text-[#cdddf0] font-sans lowercase">
               orbit
             </h1>
           </div>
 
-          <h2 className="text-lg font-bold text-center text-neutral-900 mb-6">Sign in to your tracker</h2>
+          <h2 className="text-lg font-bold text-center text-[#cdddf0] mb-6">Sign in to your tracker</h2>
 
           {loginError && (
-            <div className="bg-red-50 text-red-600 border border-red-100 rounded-xl p-3 text-xs font-semibold mb-4 text-center">
+            <div className="bg-red-700/10 text-red-300 border border-red-700/20 rounded-xl p-3 text-xs font-semibold mb-4 text-center">
               {loginError}
             </div>
           )}
 
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-neutral-500 mb-1.5">Username</label>
+              <label className="block text-xs font-semibold text-[#cdddf0] mb-1.5">Username</label>
               <input
                 type="text"
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
                 placeholder="admin"
-                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#4f46e5] focus:bg-white transition-all"
+                className="w-full bg-[#183435] border border-[#cdddf0]/10 rounded-xl px-4 py-2.5 text-sm font-semibold text-[#cdddf0] placeholder:text-[#9fb3b2] focus:outline-none focus:border-[#38bdf8] focus:bg-[#203b3f] transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-neutral-500 mb-1.5">Password</label>
+              <label className="block text-xs font-semibold text-[#cdddf0] mb-1.5">Password</label>
               <input
                 type="password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#4f46e5] focus:bg-white transition-all"
+                className="w-full bg-[#183435] border border-[#cdddf0]/10 rounded-xl px-4 py-2.5 text-sm font-semibold text-[#cdddf0] placeholder:text-[#9fb3b2] focus:outline-none focus:border-[#38bdf8] focus:bg-[#203b3f] transition-all"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-sm py-3 rounded-xl tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-all"
+              className="w-full bg-gradient-to-b from-[#38bdf8] to-[#0284c7] hover:from-[#7dd3fc] hover:to-[#38bdf8] text-[#1c3538] font-bold text-sm py-3 rounded-xl tracking-wide flex items-center justify-center gap-2 cursor-pointer transition-all"
             >
               Sign In
             </button>
@@ -609,6 +611,17 @@ function AppContent() {
                 onDeletePayment={handleDeletePayment}
                 onEditEntry={handleStartEditEntry}
                 onDeleteEntry={handleDeleteEntry}
+              />
+            </div>
+          } />
+
+          <Route path="/payments" element={
+            <div className="animate-fade-in">
+              <PaymentsView
+                payments={payments}
+                clients={clients}
+                onDeletePayment={handleDeletePayment}
+                onAddPayment={handleAddPayment}
               />
             </div>
           } />
@@ -703,6 +716,21 @@ function AppContent() {
 
         <button
           onClick={() => {
+            navigate('/payments');
+          }}
+          className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
+            activeTab === 'payments'
+              ? 'bg-[#38bdf8] text-[#1c3538] shadow-md scale-105'
+              : 'text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#2c4e52]'
+          }`}
+          id="nav-btn-payments"
+          title="Payments"
+        >
+          <DollarSign className="w-5.5 h-5.5" />
+        </button>
+
+        <button
+          onClick={() => {
             navigate('/presets');
           }}
           className={`p-3 rounded-full cursor-pointer transition-all flex items-center justify-center ${
@@ -717,9 +745,9 @@ function AppContent() {
         </button>
       </nav>
       
-      {/* GIANT FIXED BACKGROUND LOGO (BOTTOM 20% CUT OFF) */}
-      <div className="fixed bottom-0 left-0 right-0 h-[24vh] pointer-events-none z-[-1] overflow-hidden flex items-end justify-center select-none">
-        <h1 className="text-[22vw] font-bold text-[#cdddf0]/[0.05] leading-none -mb-[4.4vw] tracking-tighter select-none font-sans lowercase">
+      {/* GIANT FIXED BACKGROUND LOGO — show at bottom with subtle gradient */}
+      <div className="fixed bottom-0 left-0 right-0 h-[40vh] pointer-events-none z-[-1] overflow-hidden flex items-end justify-center select-none">
+        <h1 className="w-full text-center whitespace-nowrap font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#38bdf8]/20 via-[#7dd3fc]/12 to-[#cdddf0]/6 leading-none tracking-tighter select-none font-sans lowercase text-[60vw] md:text-[52vw] lg:text-[36vw] xl:text-[30vw] 2xl:text-[26vw]" style={{ marginBottom: '-0.15em' }}>
           orbit
         </h1>
       </div>
