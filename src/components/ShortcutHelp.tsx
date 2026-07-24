@@ -50,6 +50,11 @@ export default function ShortcutHelp({ open, onClose }: ShortcutHelpProps) {
           </div>
 
           <div className="flex items-center justify-between px-3 py-2 rounded-md bg-[#162a2d]">
+            <div className="text-sm text-[#cdddf0]">New log / open add form</div>
+            <div className="font-mono text-xs text-[#cdddf0]">n</div>
+          </div>
+
+          <div className="flex items-center justify-between px-3 py-2 rounded-md bg-[#162a2d]">
             <div className="text-sm text-[#cdddf0]">Back (or to clients list)</div>
             <div className="font-mono text-xs text-[#cdddf0]">0</div>
           </div>

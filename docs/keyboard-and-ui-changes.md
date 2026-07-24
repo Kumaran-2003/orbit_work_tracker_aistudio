@@ -38,6 +38,7 @@ This document explains the recent UI and keyboard shortcut changes made to the p
   - `2` → Clients list
   - `3` → Payments
   - `4` → Presets
+   - `n` → New log (open add form)
   - `0` → Back (go to clients list when on `/clients/:id`, otherwise history back)
   - `Escape` → close modal / cancel entry (existing behavior)
 

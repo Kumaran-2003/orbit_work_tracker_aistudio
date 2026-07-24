@@ -175,6 +175,23 @@ function AppContent() {
         event.preventDefault();
         navigate(targetRoute);
       }
+
+      // Open new log modal with `n`
+      if (event.key === 'n') {
+        const tgt = event.target as HTMLElement | null;
+        const isTyping = !!tgt && (
+          tgt.tagName === 'INPUT' ||
+          tgt.tagName === 'TEXTAREA' ||
+          tgt.tagName === 'SELECT' ||
+          tgt.isContentEditable
+        );
+        if (!isTyping && !event.metaKey && !event.ctrlKey && !event.altKey) {
+          event.preventDefault();
+          setEditingEntry(null);
+          setIsAdding(true);
+          return;
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
