@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import PresetsManager from './components/PresetsManager';
 import PaymentsView from './components/PaymentsView';
 import WorkEntryForm from './components/WorkEntryForm';
 import RecentWorksList from './components/RecentWorksList';
 import ClientWorksView from './components/ClientWorksView';
+import ShortcutHelp from './components/ShortcutHelp';
 import { Client, WorkType, WorkEntry, Payment } from './types';
 import { Home, Users, Settings, Plus, Layers, ArrowUpRight, DollarSign, Briefcase, Video } from 'lucide-react';
 
@@ -91,6 +92,7 @@ function AppContent() {
   const activeTab = location.pathname.startsWith('/clients') ? 'clients' :
                     location.pathname.startsWith('/payments') ? 'payments' :
                     location.pathname === '/presets' ? 'presets' : 'logs';
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
 
@@ -100,10 +102,98 @@ function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return sessionStorage.getItem('orbit_authenticated') === 'true';
   });
+  const loginUsernameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsAdding(false);
+        setEditingEntry(null);
+        return;
+      }
+
+      // Global 'back' shortcut: press `0` to go back.
+      // If currently viewing a specific client ("/clients/:id"), go to clients list.
+      if (event.key === '0') {
+        const target = event.target as HTMLElement | null;
+        const isTypingTarget = !!target && (
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable
+        );
+
+        if (!isTypingTarget && !event.metaKey && !event.ctrlKey && !event.altKey) {
+          event.preventDefault();
+          if (location.pathname.startsWith('/clients/') && !location.pathname.endsWith('/clients')) {
+            navigate('/clients');
+          } else {
+            navigate(-1);
+          }
+          return;
+        }
+      }
+
+      // Toggle shortcuts overlay with `?` — skip when typing
+      if (event.key === '?') {
+        const tgt = event.target as HTMLElement | null;
+        const isTyping = !!tgt && (
+          tgt.tagName === 'INPUT' ||
+          tgt.tagName === 'TEXTAREA' ||
+          tgt.tagName === 'SELECT' ||
+          tgt.isContentEditable
+        );
+        if (!isTyping && !event.metaKey && !event.ctrlKey && !event.altKey) {
+          event.preventDefault();
+          setShowShortcuts((s) => !s);
+          return;
+        }
+      }
+
+      const target = event.target as HTMLElement | null;
+      const isTypingTarget = !!target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      );
+
+      if (isTypingTarget || event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+
+      const shortcutRoutes: Record<string, string> = {
+        '1': '/',
+        '2': '/clients',
+        '3': '/payments',
+        '4': '/presets',
+      };
+
+      const targetRoute = shortcutRoutes[event.key];
+      if (targetRoute) {
+        event.preventDefault();
+        navigate(targetRoute);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
 
   const expectedUsername = import.meta.env.VITE_APP_USERNAME;
   const expectedPassword = import.meta.env.VITE_APP_PASSWORD;
   const isAuthConfigured = expectedUsername && expectedPassword;
+
+  useEffect(() => {
+    if (isAuthConfigured && !isAuthenticated) {
+      const focusTimer = window.setTimeout(() => {
+        loginUsernameRef.current?.focus();
+      }, 80);
+
+      return () => window.clearTimeout(focusTimer);
+    }
+  }, [isAuthConfigured, isAuthenticated]);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -515,6 +605,7 @@ function AppContent() {
             <div>
               <label className="block text-xs font-semibold text-[#cdddf0] mb-1.5">Username</label>
               <input
+                ref={loginUsernameRef}
                 type="text"
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
@@ -744,6 +835,8 @@ function AppContent() {
           <Settings className="w-5.5 h-5.5" />
         </button>
       </nav>
+      
+      <ShortcutHelp open={showShortcuts} onClose={() => setShowShortcuts(false)} />
       
       {/* GIANT FIXED BACKGROUND LOGO — show at bottom with subtle gradient */}
       <div className="fixed bottom-0 left-0 right-0 h-[40vh] pointer-events-none z-[-1] overflow-hidden flex items-end justify-center select-none">

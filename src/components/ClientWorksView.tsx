@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Client, WorkType, WorkEntry, QuickRange, Payment } from '../types';
 import { Icon } from '@iconify/react';
@@ -62,6 +62,7 @@ export default function ClientWorksView({
 
   // Three-dot dropdown menu state
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [activePaymentMenuId, setActivePaymentMenuId] = useState<string | null>(null);
 
   // Lookup Maps
   const clientMap = useMemo(() => new Map<string, Client>(clients.map((c) => [c.id, c])), [clients]);
@@ -252,6 +253,39 @@ export default function ClientWorksView({
     setShowCustomDates(false);
   };
 
+  useEffect(() => {
+    const handleClientLetterNavigation = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTypingTarget = !!target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      );
+
+      if (isTypingTarget || event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+      if (!/^[a-z]$/.test(key)) {
+        return;
+      }
+
+      const match = clients.find((client) => client.name.toLowerCase().startsWith(key));
+      if (!match) {
+        return;
+      }
+
+      event.preventDefault();
+      handleResetFilters();
+      navigate(`/clients/${match.id}`);
+    };
+
+    window.addEventListener('keydown', handleClientLetterNavigation);
+    return () => window.removeEventListener('keydown', handleClientLetterNavigation);
+  }, [clients, navigate]);
+
   // Extract structured month/day/year for vertical date block
   const parseDateBlock = (dateStr: string) => {
     const parts = dateStr.split('-');
@@ -386,11 +420,20 @@ export default function ClientWorksView({
               {clients.map((client) => {
                 const count = clientWorksCount[client.id] || 0;
                 return (
-                  <button
+                  <div
                     key={client.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => {
                       navigate('/clients/' + client.id);
                       handleResetFilters();
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        navigate('/clients/' + client.id);
+                        handleResetFilters();
+                      }
                     }}
                     className="p-5 bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] text-left transition-all hover:border-[#38bdf8]/40 shadow-lg flex items-center justify-between cursor-pointer group"
                     id={`client-portfolio-${client.id}`}
@@ -407,7 +450,7 @@ export default function ClientWorksView({
                     <div className="w-8 h-8 rounded-full bg-[#1c3538] border border-[#cdddf0]/15 flex items-center justify-center text-[#cdddf0]/60 group-hover:text-[#38bdf8] transition-colors shrink-0">
                       <ChevronRight className="w-4 h-4" />
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -435,7 +478,9 @@ export default function ClientWorksView({
         </button>
 
         <h1 className="text-2xl font-bold text-[#cdddf0] tracking-tight">
-          {activeClient?.name}
+          {activeClient?.name || (
+            <span className="text-[#cdddf0]/50 font-medium">Client {selectedClientId}</span>
+          )}
         </h1>
       </div>
 
@@ -445,31 +490,47 @@ export default function ClientWorksView({
       {/* FILTER CONTROLS BAR */}
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* TIMELINE PILL SELECTORS */}
-          <div className="flex flex-wrap gap-1.5">
-            {([
-              { key: 'all', label: 'All' },
-              { key: 'this-week', label: 'This Week' },
-              { key: 'this-month', label: 'This Month' },
-              { key: 'last-3-months', label: 'Last 3 Months' },
-              { key: 'this-year', label: 'This Year' },
-            ] as const).map((range) => (
-              <button
-                key={range.key}
-                onClick={() => {
-                  setSelectedQuickRange(range.key);
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            {/* TIMELINE QUICK-RANGE SELECT */}
+            <div className="relative min-w-[200px]">
+              <select
+                id="client-range-select"
+                aria-label="Quick date range"
+                value={selectedQuickRange}
+                onChange={(e) => {
+                  setSelectedQuickRange(e.target.value as any);
                   setShowCustomDates(false);
                 }}
-                className={`px-4.5 py-2.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
-                  !showCustomDates && selectedQuickRange === range.key
-                    ? 'bg-[#38bdf8] text-[#1c3538] font-bold shadow-md'
+                className="w-full pl-4 pr-9 py-2.5 bg-[#224044] border border-[#cdddf0]/20 rounded-full text-xs font-semibold text-[#cdddf0] focus:outline-none appearance-none cursor-pointer hover:border-[#38bdf8]/40 transition-colors shadow-sm"
+              >
+                <option value="all">All</option>
+                <option value="this-week">This Week</option>
+                <option value="this-month">This Month</option>
+                <option value="last-3-months">Last 3 Months</option>
+                <option value="this-year">This Year</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#cdddf0]/60">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* CUSTOM RANGE BUTTON (grouped under select) */}
+            <div className="flex justify-start">
+              <button
+                onClick={() => setShowCustomDates(!showCustomDates)}
+                className={`px-4.5 py-2.5 text-xs font-semibold rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+                  showCustomDates
+                    ? 'bg-[#38bdf8] text-[#1c3538] font-bold shadow-sm'
                     : 'bg-[#1c3538] text-[#cdddf0]/70 hover:bg-[#27484d] hover:text-[#cdddf0]'
                 }`}
-                id={`client-quick-range-${range.key}`}
+                id="custom-date-toggle-btn"
               >
-                {range.label}
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Custom Range</span>
               </button>
-            ))}
+            </div>
           </div>
 
           {/* WORK TYPE DROPDOWN */}
@@ -494,23 +555,6 @@ export default function ClientWorksView({
             </div>
           </div>
         </div>
-
-        {/* CUSTOM RANGE PILL */}
-        <div className="flex justify-start">
-          <button
-            onClick={() => setShowCustomDates(!showCustomDates)}
-            className={`px-4.5 py-2.5 text-xs font-semibold rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
-              showCustomDates
-                ? 'bg-[#38bdf8] text-[#1c3538] font-bold shadow-sm'
-                : 'bg-[#1c3538] text-[#cdddf0]/70 hover:bg-[#27484d] hover:text-[#cdddf0]'
-            }`}
-            id="custom-date-toggle-btn"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Custom Range</span>
-          </button>
-        </div>
-      </div>
 
       {/* CUSTOM RANGE PICKERS */}
       {showCustomDates && (
@@ -541,6 +585,8 @@ export default function ClientWorksView({
           </div>
         </div>
       )}
+
+      </div>
 
       {/* CLIENT SPECIFIC STATS CARDS */}
       <div className="grid grid-cols-3 gap-4">
@@ -674,16 +720,46 @@ export default function ClientWorksView({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0 relative">
                     <span className="text-[#38bdf8] font-bold text-base">₹{payment.amount.toLocaleString()}</span>
-                    
-                    <button
-                      onClick={() => onDeletePayment(payment.id)}
-                      className="opacity-40 group-hover:opacity-100 p-1.5 text-[#cdddf0]/60 hover:text-rose-400 rounded-xl transition-all cursor-pointer shrink-0"
-                      title="Delete payment record"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActivePaymentMenuId(activePaymentMenuId === payment.id ? null : payment.id);
+                        }}
+                        className="p-1.5 text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#1c3538] rounded-xl transition-all cursor-pointer shrink-0"
+                        title="Payment actions"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+
+                      {activePaymentMenuId === payment.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-30"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActivePaymentMenuId(null);
+                            }}
+                          />
+                          <div className="absolute right-0 mt-2 w-32 bg-[#1c3538] border border-[#cdddf0]/20 rounded-2xl shadow-xl py-1.5 z-40 animate-fade-in text-left">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActivePaymentMenuId(null);
+                                onDeletePayment(payment.id);
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-rose-950/50 text-xs font-medium text-rose-400 flex items-center gap-2 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

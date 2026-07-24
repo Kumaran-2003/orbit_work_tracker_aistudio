@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Payment, Client } from '../types';
-import { Trash2, ChevronRight } from 'lucide-react';
+import { Trash2, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 interface PaymentsViewProps {
   payments: Payment[];
@@ -16,6 +16,7 @@ export default function PaymentsView({ payments, clients, onDeletePayment, onAdd
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [paymentNote, setPaymentNote] = useState('');
   const [selectedClientId, setSelectedClientId] = useState<string>(clients[0]?.id || '');
+  const [activePaymentMenuId, setActivePaymentMenuId] = useState<string | null>(null);
 
   const clientMap = useMemo(() => new Map(clients.map(c => [c.id, c])), [clients]);
 
@@ -169,17 +170,47 @@ export default function PaymentsView({ payments, clients, onDeletePayment, onAdd
                     </div>
                   </div>
 
-                  {/* RIGHT: amount + circular delete button styled like other cards */}
+                  {/* RIGHT: amount + overflow menu for payment actions */}
                   <div className="flex items-center gap-3 shrink-0 relative">
                     <div className="text-sm font-semibold text-[#38bdf8]">₹{p.amount.toLocaleString()}</div>
 
-                    <button
-                      onClick={() => onDeletePayment(p.id)}
-                      className="p-2 text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#1c3538] rounded-full transition-colors"
-                      title="Delete Payment"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActivePaymentMenuId(activePaymentMenuId === p.id ? null : p.id);
+                        }}
+                        className="p-2 text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#1c3538] rounded-full transition-colors"
+                        title="Payment actions"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+
+                      {activePaymentMenuId === p.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-30"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActivePaymentMenuId(null);
+                            }}
+                          />
+                          <div className="absolute right-0 mt-2 w-32 bg-[#1c3538] border border-[#cdddf0]/20 rounded-2xl shadow-xl py-1.5 z-40 animate-fade-in text-left">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActivePaymentMenuId(null);
+                                onDeletePayment(p.id);
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-rose-950/50 text-xs font-medium text-rose-400 flex items-center gap-2 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

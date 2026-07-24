@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Client, WorkType, WorkEntry } from '../types';
 import { Icon } from '@iconify/react';
 import { X, AlertCircle } from 'lucide-react';
@@ -31,6 +31,7 @@ export default function WorkEntryForm({
   });
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Load existing data if editing
   useEffect(() => {
@@ -45,6 +46,14 @@ export default function WorkEntryForm({
       if (workTypes.length > 0) setWorkTypeId(workTypes[0].id);
     }
   }, [editingEntry, clients, workTypes]);
+
+  useEffect(() => {
+    const focusTimer = window.setTimeout(() => {
+      titleInputRef.current?.focus();
+    }, 50);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [editingEntry, clients.length, workTypes.length]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +162,7 @@ export default function WorkEntryForm({
                 Work Title / Reel Name *
               </label>
               <input
+                ref={titleInputRef}
                 id="title-input"
                 type="text"
                 placeholder="e.g. Gym Motivation Reel #12 - Final Cut"
