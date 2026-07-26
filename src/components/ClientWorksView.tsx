@@ -15,8 +15,14 @@ import {
   Plus, 
   X, 
   ChevronRight, 
-  MoreHorizontal
+  MoreHorizontal,
+  FileDown
 } from 'lucide-react';
+import {
+  buildClientReportEntries,
+  exportClientWorkReport,
+  getReportRangeLabel,
+} from '../utils/exportClientReport';
 
 interface ClientWorksViewProps {
   entries: WorkEntry[];
@@ -63,6 +69,14 @@ export default function ClientWorksView({
   // Three-dot dropdown menu state
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [activePaymentMenuId, setActivePaymentMenuId] = useState<string | null>(null);
+
+  // Client work report export
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [includeNotesInExport, setIncludeNotesInExport] = useState(true);
+  const [exportFeedback, setExportFeedback] = useState<string | null>(null);
+  const [extraExportWorks, setExtraExportWorks] = useState<
+    Array<{ id: string; title: string; completedOn: string; workTypeId: string; notes: string }>
+  >([]);
 
   // Lookup Maps
   const clientMap = useMemo(() => new Map<string, Client>(clients.map((c) => [c.id, c])), [clients]);
@@ -245,6 +259,18 @@ export default function ClientWorksView({
 
   const activeClient = selectedClientId ? clientMap.get(selectedClientId) : null;
 
+  const reportRangeLabel = useMemo(
+    () =>
+      getReportRangeLabel({
+        showCustomDates,
+        customFromDate,
+        customToDate,
+        selectedQuickRange,
+        entries: filteredEntries,
+      }),
+    [showCustomDates, customFromDate, customToDate, selectedQuickRange, filteredEntries]
+  );
+
   const handleResetFilters = () => {
     setSelectedWorkTypeId('all');
     setSelectedQuickRange('all');
@@ -252,6 +278,58 @@ export default function ClientWorksView({
     setCustomToDate('');
     setShowCustomDates(false);
   };
+
+  const createEmptyExtraWork = () => ({
+    id: `extra-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    title: '',
+    completedOn: new Date().toISOString().split('T')[0],
+    workTypeId: workTypes[0]?.id || '',
+    notes: '',
+  });
+
+  const openExportDialog = () => {
+    setExportFeedback(null);
+    setExtraExportWorks([]);
+    setIsExportOpen(true);
+  };
+
+  const handleExportReport = () => {
+    if (!activeClient) return;
+
+    const validExtraEntries = extraExportWorks
+      .filter((item) => item.title.trim())
+      .map((item) => ({
+        title: item.title.trim(),
+        completedOn: item.completedOn,
+        workTypeName: workTypeMap.get(item.workTypeId)?.name || 'Additional work',
+        notes: item.notes.trim() || undefined,
+        isExtra: true,
+      }));
+
+    const entries = [
+      ...buildClientReportEntries(filteredEntries, workTypeMap),
+      ...validExtraEntries,
+    ].sort(
+      (a, b) => new Date(a.completedOn).getTime() - new Date(b.completedOn).getTime()
+    );
+
+    if (entries.length === 0) {
+      setExportFeedback('Add at least one logged or additional work item to export.');
+      return;
+    }
+
+    exportClientWorkReport({
+      clientName: activeClient.name,
+      rangeLabel: reportRangeLabel,
+      entries,
+      includeNotes: includeNotesInExport,
+    });
+
+    setExportFeedback('PDF downloaded. You can send this document to your client.');
+  };
+
+  const exportItemCount =
+    filteredEntries.length + extraExportWorks.filter((item) => item.title.trim()).length;
 
   useEffect(() => {
     const handleClientLetterNavigation = (event: KeyboardEvent) => {
@@ -533,26 +611,38 @@ export default function ClientWorksView({
             </div>
           </div>
 
-          {/* WORK TYPE DROPDOWN */}
-          <div className="relative shrink-0 min-w-[190px]">
-            <select
-              id="client-wt-select"
-              value={selectedWorkTypeId}
-              onChange={(e) => setSelectedWorkTypeId(e.target.value)}
-              className="w-full pl-5 pr-11 py-2.5 bg-[#224044] border border-[#cdddf0]/20 rounded-full text-xs font-semibold text-[#cdddf0] focus:outline-none appearance-none cursor-pointer hover:border-[#38bdf8]/40 transition-colors shadow-sm"
-            >
-              <option value="all">All Work Types</option>
-              {workTypes.map((wt) => (
-                <option key={wt.id} value={wt.id} className="bg-[#1c3538] text-[#cdddf0]">
-                  {wt.name}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#cdddf0]/60">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-              </svg>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 shrink-0">
+            {/* WORK TYPE DROPDOWN */}
+            <div className="relative min-w-[190px]">
+              <select
+                id="client-wt-select"
+                value={selectedWorkTypeId}
+                onChange={(e) => setSelectedWorkTypeId(e.target.value)}
+                className="w-full pl-5 pr-11 py-2.5 bg-[#224044] border border-[#cdddf0]/20 rounded-full text-xs font-semibold text-[#cdddf0] focus:outline-none appearance-none cursor-pointer hover:border-[#38bdf8]/40 transition-colors shadow-sm"
+              >
+                <option value="all">All Work Types</option>
+                {workTypes.map((wt) => (
+                  <option key={wt.id} value={wt.id} className="bg-[#1c3538] text-[#cdddf0]">
+                    {wt.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#cdddf0]/60">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={openExportDialog}
+              className="px-4.5 py-2.5 text-xs font-semibold rounded-full transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[#38bdf8] text-[#1c3538] font-bold shadow-sm hover:bg-[#7dd3fc]"
+              id="export-client-report-btn"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              <span>Export Report</span>
+            </button>
           </div>
         </div>
 
@@ -888,6 +978,218 @@ export default function ClientWorksView({
           </div>
         )}
       </div>
+
+      {isExportOpen && (
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setIsExportOpen(false)}
+          />
+
+          <div className="relative bg-[#203c40] rounded-2xl p-5 sm:p-6 w-full max-w-xl text-[#cdddf0] shadow-xl my-4">
+            <button
+              type="button"
+              onClick={() => setIsExportOpen(false)}
+              className="absolute top-4 right-4 p-2 text-[#cdddf0]/60 hover:text-[#cdddf0] hover:bg-[#27484d] rounded-full transition-colors cursor-pointer"
+              aria-label="Close export dialog"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <h3 className="text-lg font-semibold mb-1 pr-10">Export work report</h3>
+            <p className="text-xs text-[#cdddf0]/60 mb-4">
+              Review the filtered logs, then add any extra work before downloading.
+            </p>
+
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center justify-between px-3 py-2 rounded-md bg-[#162a2d]">
+                <div className="text-sm text-[#cdddf0]/70">Client</div>
+                <div className="text-sm font-medium text-[#cdddf0]">{activeClient?.name}</div>
+              </div>
+              <div className="flex items-center justify-between px-3 py-2 rounded-md bg-[#162a2d]">
+                <div className="text-sm text-[#cdddf0]/70">Period</div>
+                <div className="text-sm font-semibold text-[#cdddf0] text-right max-w-[60%]">
+                  {reportRangeLabel}
+                </div>
+              </div>
+              <div className="flex items-center justify-between px-3 py-2 rounded-md bg-[#162a2d]">
+                <div className="text-sm text-[#cdddf0]/70">Items in PDF</div>
+                <div className="text-sm font-medium text-[#cdddf0]">
+                  {exportItemCount}
+                  {extraExportWorks.some((item) => item.title.trim()) && (
+                    <span className="text-[#cdddf0]/50 font-normal">
+                      {' '}({filteredEntries.length} logged + {extraExportWorks.filter((item) => item.title.trim()).length} extra)
+                    </span>
+                  )}
+                </div>
+              </div>
+              {selectedWorkTypeId !== 'all' && (
+                <div className="flex items-center justify-between px-3 py-2 rounded-md bg-[#162a2d]">
+                  <div className="text-sm text-[#cdddf0]/70">Work type filter</div>
+                  <div className="text-sm font-medium text-[#cdddf0]">
+                    {workTypeMap.get(selectedWorkTypeId)?.name || 'Selected type'}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <label className="flex items-center gap-2.5 mb-4 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={includeNotesInExport}
+                onChange={(e) => setIncludeNotesInExport(e.target.checked)}
+                className="rounded border-[#cdddf0]/30 bg-[#162a2d] text-[#38bdf8] focus:ring-[#38bdf8]/40"
+              />
+              <span className="text-sm text-[#cdddf0]">Include project notes</span>
+            </label>
+
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-[#cdddf0]">Additional works</h4>
+                <button
+                  type="button"
+                  onClick={() => setExtraExportWorks((prev) => [...prev, createEmptyExtraWork()])}
+                  className="px-3 py-1.5 text-[11px] font-semibold rounded-full bg-[#1c3538] text-[#38bdf8] hover:bg-[#27484d] transition-colors cursor-pointer flex items-center gap-1"
+                  id="add-extra-export-work-btn"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Add work</span>
+                </button>
+              </div>
+              <p className="text-[11px] text-[#cdddf0]/50 mb-3">
+                Use this for work that isn’t already logged. Extra items are only added to this PDF.
+              </p>
+
+              {extraExportWorks.length === 0 ? (
+                <div className="px-3 py-4 rounded-xl border border-dashed border-[#cdddf0]/20 text-xs text-[#cdddf0]/50 text-center">
+                  No additional works yet.
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
+                  {extraExportWorks.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className="p-3 rounded-xl bg-[#162a2d] border border-[#cdddf0]/10 space-y-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-medium text-[#cdddf0]/50 uppercase tracking-wider">
+                          Extra #{index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExtraExportWorks((prev) => prev.filter((row) => row.id !== item.id))
+                          }
+                          className="p-1.5 text-[#cdddf0]/50 hover:text-rose-400 hover:bg-[#27484d] rounded-full transition-colors cursor-pointer"
+                          aria-label={`Remove extra work ${index + 1}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <input
+                        type="text"
+                        value={item.title}
+                        onChange={(e) =>
+                          setExtraExportWorks((prev) =>
+                            prev.map((row) =>
+                              row.id === item.id ? { ...row, title: e.target.value } : row
+                            )
+                          )
+                        }
+                        placeholder="Work title"
+                        className="w-full px-3 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0] placeholder:text-[#cdddf0]/35 focus:outline-none focus:border-[#38bdf8]/40"
+                      />
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input
+                          type="date"
+                          value={item.completedOn}
+                          onChange={(e) =>
+                            setExtraExportWorks((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id ? { ...row, completedOn: e.target.value } : row
+                              )
+                            )
+                          }
+                          className="w-full px-3 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0] focus:outline-none focus:border-[#38bdf8]/40"
+                        />
+                        <select
+                          value={item.workTypeId}
+                          onChange={(e) =>
+                            setExtraExportWorks((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id ? { ...row, workTypeId: e.target.value } : row
+                              )
+                            )
+                          }
+                          className="w-full px-3 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0] focus:outline-none focus:border-[#38bdf8]/40"
+                        >
+                          {workTypes.length === 0 ? (
+                            <option value="">No work types</option>
+                          ) : (
+                            workTypes.map((wt) => (
+                              <option key={wt.id} value={wt.id}>
+                                {wt.name}
+                              </option>
+                            ))
+                          )}
+                        </select>
+                      </div>
+
+                      {includeNotesInExport && (
+                        <textarea
+                          value={item.notes}
+                          onChange={(e) =>
+                            setExtraExportWorks((prev) =>
+                              prev.map((row) =>
+                                row.id === item.id ? { ...row, notes: e.target.value } : row
+                              )
+                            )
+                          }
+                          placeholder="Notes (optional)"
+                          rows={2}
+                          className="w-full px-3 py-2 bg-[#224044] border border-[#cdddf0]/20 rounded-lg text-xs font-medium text-[#cdddf0] placeholder:text-[#cdddf0]/35 focus:outline-none focus:border-[#38bdf8]/40 resize-none"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {exportFeedback && (
+              <p className="text-xs text-[#38bdf8] mb-4 leading-relaxed">{exportFeedback}</p>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                onClick={handleExportReport}
+                disabled={exportItemCount === 0}
+                className="flex-1 px-4 py-2.5 rounded-full text-xs font-bold bg-[#38bdf8] text-[#1c3538] hover:bg-[#7dd3fc] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                id="confirm-export-report-btn"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                <span>Download PDF</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsExportOpen(false)}
+                className="px-4 py-2.5 rounded-full text-xs font-semibold bg-[#1c3538] text-[#cdddf0]/80 hover:bg-[#27484d] transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+            {exportItemCount === 0 && (
+              <p className="mt-3 text-xs text-[#cdddf0]/50">
+                No filtered logs yet — add additional works above, or adjust the date range.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
