@@ -138,7 +138,7 @@ export default function PaymentsView({ payments, clients, onDeletePayment, onAdd
       )}
 
       <div className="space-y-3.5 pt-2">
-        <h2 className="text-xl font-medium text-[#cdddf0] tracking-tight">Payme nts</h2>
+        <h2 className="text-xl font-medium text-[#cdddf0] tracking-tight">Payments</h2>
 
         {filtered.length === 0 ? (
           <div className="p-12 text-center bg-[#224044] border border-[#cdddf0]/15 rounded-[1.8rem] shadow-lg text-[#cdddf0]/60 font-medium text-sm">
