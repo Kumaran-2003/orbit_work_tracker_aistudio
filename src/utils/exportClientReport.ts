@@ -138,19 +138,23 @@ export function exportClientWorkReport(options: ClientReportOptions): void {
   doc.setTextColor(20, 36, 39);
   doc.text(options.rangeLabel, pageWidth - marginX, 18, { align: 'right' });
 
+  doc.setFontSize(22);
+  doc.setTextColor(15, 118, 110);
+  doc.text(String(options.entries.length), pageWidth - marginX, 28, { align: 'right' });
+
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9.5);
+  doc.setFontSize(8.5);
   doc.setTextColor(91, 111, 116);
   doc.text(
-    `${options.entries.length} completed ${options.entries.length === 1 ? 'item' : 'items'}`,
+    options.entries.length === 1 ? 'completed item' : 'completed items',
     pageWidth - marginX,
-    25,
+    33,
     { align: 'right' }
   );
 
   doc.setDrawColor(20, 36, 39);
   doc.setLineWidth(0.6);
-  doc.line(marginX, 35, pageWidth - marginX, 35);
+  doc.line(marginX, 38, pageWidth - marginX, 38);
 
   const head = includeNotes
     ? [['#', 'Date', 'Work', 'Type', 'Notes']]
@@ -173,7 +177,7 @@ export function exportClientWorkReport(options: ClientReportOptions): void {
         });
 
   autoTable(doc, {
-    startY: 42,
+    startY: 45,
     head,
     body,
     theme: 'grid',
